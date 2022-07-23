@@ -1,0 +1,39 @@
+{
+  "version": "0.0.0",
+  "name": "vite-plugin-build",
+  "author": "samonxian",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "files": [
+    "dist",
+    "lib",
+    "es"
+  ],
+  "scripts": {
+    "eslint": "eslint src/**/*.js src/**/*.ts src/**/*.jsx src/**/*.tsx --no-error-on-unmatched-pattern",
+    "tsc:es": "tsc --declarationDir es",
+    "tsc:lib": "tsc --declarationDir lib",
+    "tsc": "npm run tsc:lib && npm run tsc:es",
+    "clean": "rimraf lib es dist",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "build:only": "vite build",
+    "build": "npm run clean && npm run tsc && vite build"
+  },
+  "dependencies": {
+    "cli-progress": "^3.11.2",
+    "fast-glob": "^3.2.11",
+    "fs-extra": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "cross-spawn": "7.0.3",
+    "eslint": "8.20.0",
+    "picocolors": "^1.0.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.6.4",
+    "rollup": "^2.77.0",
+    "vitest": "^0.18.0",
+    "vite": "^3.0.2"
+  }
+}
