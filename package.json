@@ -1,0 +1,36 @@
+{
+  "private": true,
+  "dependencies": {
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.30.7",
+    "@typescript-eslint/parser": "^5.30.7",
+    "commitizen": "^4.2.5",
+    "eslint": "8.20.0",
+    "eslint-define-config": "^1.5.1",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-node": "^11.1.0",
+    "git-cz": "^4.9.0",
+    "husky": "^8.0.1",
+    "lerna": "^5.1.8",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1"
+  },
+  "scripts": {
+    "postinstall": "husky install && npm run bootstrap",
+    "cm": "git-cz",
+    "lint-staged": "lint-staged --allow-empty",
+    "commitlint": "commitlint --edit $1",
+    "dev": "npm start",
+    "start": "npm run dev -prefix ./website",
+    "build": "lerna run build",
+    "bootstrap": "lerna bootstrap --ignore-scripts -- --legacy-peer-deps",
+    "build:publish": "npm run build && lerna publish",
+    "deploy": "npm run deploy -prefix ./website"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  }
+}
