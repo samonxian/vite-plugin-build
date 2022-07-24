@@ -1,6 +1,6 @@
 # vite-plugin-build
 
-![](./assets/build.png)
+<img width="526" alt="" src="https://user-images.githubusercontent.com/1954171/180627715-c75377fa-481e-4184-a546-40e17b6c0f23.png">
 
 vite 库模式插件，支持单个文件转换（vite 的默认模式），还拓展支持整个文件夹的转换（多个输入文件，多个输出文件）。
 
