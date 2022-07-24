@@ -144,7 +144,8 @@ export interface BuildFilesOptions {
    */
   ignoreInputs?: string[];
   /**
-   * 此配置会覆盖所有当前构建中 vite 配置，建议优先使用 rollupOptionsOutput 和 rollupOptionsExternal 配置
+   * 此配置会覆盖所有当前构建中 vite config 中 build 配置，
+   * 建议优先使用 rollupOptionsOutput、rollupOptionsExternal等其他字段配置
    * 支持函数，第一个参数是入口文件路径
    */
   buildOptions?: BuildOptions | ((inputFilePath: string) => BuildOptions);

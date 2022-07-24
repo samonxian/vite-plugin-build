@@ -20,14 +20,12 @@ export interface BuildLibOptions {
   buildOptions: BuildOptions;
   /**
    * 构建开始钩子函数，第一个参数 totalFilesCount 是转换文件的总数
-   * @param totalFilesCount 所有转换的文件数量
    */
-  startBuild?: (totalFilesCount: number) => void;
+  startBuild?: () => void;
   /**
    * 所有构建结束钩子函数
-   * @param totalFilesCount 所有转换的文件数量
    */
-  endBuild?: (totalFilesCount: number) => void;
+  endBuild: () => void;
   /**
    * 插件钩子函数，请不要使用此字段
    */
@@ -43,7 +41,7 @@ export async function buildLib(options: BuildLibOptions) {
     return acc;
   }, {});
 
-  startBuild?.(1);
+  startBuild?.();
   await build({
     ...viteConfig,
     plugins: [
@@ -58,5 +56,5 @@ export async function buildLib(options: BuildLibOptions) {
     logLevel: 'error',
     build: buildOptions,
   });
-  endBuild?.(1);
+  endBuild?.();
 }

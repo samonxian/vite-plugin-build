@@ -8,16 +8,16 @@ import type { BuildLibOptions } from './buildLib';
 import { buildLib } from './buildLib';
 import { createReporter } from './reporter';
 
-interface Options {
+export interface Options {
   /**
-   * vite 库模式配置，入口文件打包成一个文件
+   * vite 库模式配置，入口文件打包成一个文件，不配置则不开启此功能
    */
   libBuild?: BuildLibOptions;
   /**
    * vite 库模式配置，指定文件夹下的所有 js 或者 ts 文件转成 commonjs 和 es module 的文件
-   * 可以是函数，第一个参数为输出文件相对转换目录的路径
+   * 默认开启此功能
    */
-  fileBuild?: BuildFilesOptions;
+  fileBuild?: BuildFilesOptions | boolean;
 }
 
 const pluginName = 'vite:build';
@@ -26,7 +26,7 @@ let reporter: ReturnType<typeof createReporter>;
 export const interceptConsoleInstance = new InterceptConsole();
 
 export function buildPlugin(options: Options = {}): Plugin {
-  const { fileBuild, libBuild } = options;
+  const { fileBuild = true, libBuild } = options;
   let config: ResolvedConfig;
 
   return {
@@ -112,11 +112,13 @@ export function buildPlugin(options: Options = {}): Plugin {
           },
         };
         const buildPromise = [
-          buildFiles({
-            ...fileBuild,
-            viteConfig,
-            pluginHooks,
-          }),
+          typeof fileBuild === 'object'
+            ? buildFiles({
+                ...fileBuild,
+                viteConfig,
+                pluginHooks,
+              })
+            : false,
           libBuild &&
             buildLib({
               ...libBuild,
