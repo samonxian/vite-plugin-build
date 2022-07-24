@@ -61,6 +61,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
       indent: false,
       exports: 'named',
       assetFileNames: '[name].[ext]',
+      inlineDynamicImports: true,
       ...lastRollupOptionsOutput,
       dir: undefined,
     };
