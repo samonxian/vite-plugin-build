@@ -1,1 +1,1 @@
-# http mock
+./packages/vite-plugin-build
