@@ -3,25 +3,19 @@
   "name": "vite-plugin-build",
   "author": "samonxian",
   "main": "lib/index.js",
-  "module": "es/index.js",
   "files": [
-    "dist",
-    "lib",
-    "es"
+    "lib"
   ],
   "scripts": {
     "eslint": "eslint src/**/*.js src/**/*.ts src/**/*.jsx src/**/*.tsx --no-error-on-unmatched-pattern",
-    "tsc:es": "tsc --declarationDir es",
-    "tsc:lib": "tsc --declarationDir lib",
-    "tsc": "npm run tsc:lib && npm run tsc:es",
+    "tsc": "tsc --declarationDir lib",
     "clean": "rimraf lib es dist",
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "build:only": "vite build",
-    "build": "npm run clean && npm run tsc && vite build"
+    "build": "npm run eslint && npm run clean && npm run tsc && vite build"
   },
   "dependencies": {
-    "cli-progress": "^3.11.2",
     "fast-glob": "^3.2.11",
     "fs-extra": "^10.1.0"
   },
