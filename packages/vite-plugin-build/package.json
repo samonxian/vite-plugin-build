@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.2.1",
   "name": "vite-plugin-build",
   "author": "samonxian",
   "main": "lib/index.js",
