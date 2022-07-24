@@ -9,7 +9,7 @@
   "scripts": {
     "eslint": "eslint src/**/*.js src/**/*.ts src/**/*.jsx src/**/*.tsx --no-error-on-unmatched-pattern",
     "tsc": "tsc --declarationDir lib",
-    "clean": "rimraf lib es dist",
+    "clean": "rimraf lib es dist tsconfig.tsbuildinfo",
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "build:only": "vite build",

@@ -112,13 +112,13 @@ export function buildPlugin(options: Options = {}): Plugin {
           },
         };
         const buildPromise = [
-          typeof fileBuild === 'object'
-            ? buildFiles({
-                ...fileBuild,
+          fileBuild === false
+            ? false
+            : buildFiles({
+                ...(typeof fileBuild === 'object' ? fileBuild : {}),
                 viteConfig,
                 pluginHooks,
-              })
-            : false,
+              }),
           libBuild &&
             buildLib({
               ...libBuild,
