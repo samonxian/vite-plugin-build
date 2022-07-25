@@ -5,6 +5,15 @@ import type { ExternalOption, OutputOptions } from 'rollup';
 import fg from 'fast-glob';
 
 let incrementCount = 0;
+export function isVueTempFile(filePath: string) {
+  // vue 文件转换的临时文件路径需要特殊处理
+  if (filePath.includes('?vue') && filePath.includes('lang.')) {
+    return true;
+  }
+
+  return false;
+}
+
 /**
  * 默认指定文件为 commonjs 和 es 两种 js规范语法
  * @param fileRelativePath 文件的相对根目录的路径格式为 src/test.js 或者 test.js
@@ -39,12 +48,12 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
       if (rollupOptionsExternal) {
         return rollupOptionsExternal(id, importer, isResolved, fileRelativePath);
       }
-      if (
-        id.includes('.less') ||
-        id.includes('.css') ||
-        id.includes('.svg') ||
-        id === path.resolve(process.cwd(), fileRelativePath)
-      ) {
+
+      function isAsset() {
+        return id.includes('.less') || id.includes('.css') || id.includes('.svg');
+      }
+
+      if (isAsset() || isVueTempFile(id) || id === path.resolve(process.cwd(), fileRelativePath)) {
         return false;
       }
       return true;
@@ -78,7 +87,23 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
         ...(viteConfig ? viteConfig.plugins : []),
         {
           name: 'vite:build-file-transform',
+          enforce: 'pre',
           ...lastPluginHooks,
+          transform(code, id) {
+            // @ts-ignore
+            const tran = lastPluginHooks.transform?.(code, id);
+
+            if (tran) {
+              return tran;
+            }
+
+            const lastCode = removeSuffix(code);
+
+            return {
+              code: lastCode,
+              map: lastBuildOptions?.sourcemap ? this.getCombinedSourcemap() : null,
+            };
+          },
         },
       ],
       mode: 'production',
@@ -133,6 +158,35 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
 
   incrementCount += 1;
   singleFileBuildSuccessCallback?.(incrementCount, fileRelativePath);
+}
+
+function removeSuffix(code: string) {
+  let lastCode = code;
+  lastCode = createRemoveSvelteSuffix(lastCode, 'vue');
+  lastCode = createRemoveSvelteSuffix(lastCode, 'svelte');
+
+  return lastCode;
+}
+
+export function createRemoveSvelteSuffix(code: string, suffix: string) {
+  let lastCode = code;
+  const match = code.match(new RegExp(`.*import.*from.*\\.${suffix}`, 'g'));
+
+  if (match) {
+    lastCode = match.reduce((acc, cur) => {
+      const replaceMatch = cur.match(new RegExp(`(.*)(import.*from.*)\\.${suffix}`));
+      if (replaceMatch) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [_, preStr, replaceStr] = replaceMatch;
+        if (preStr.trim() === '') {
+          acc = acc.replace(cur, replaceStr || '');
+        }
+      }
+      return acc;
+    }, code);
+  }
+
+  return lastCode;
 }
 
 export interface BuildFilesOptions {

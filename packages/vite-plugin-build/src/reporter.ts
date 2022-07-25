@@ -114,7 +114,7 @@ export function createReporter(config: ResolvedConfig) {
               isCSS ? WriteType.CSS : isMap ? WriteType.SOURCE_MAP : WriteType.ASSET,
               longest,
               isCSS ? await getCompressedSize(chunk.source) : undefined,
-              outputFilePath,
+              outputFilePath ? outputFilePath.replace(`/${path.basename(outputFilePath)}`, '') : null,
             );
           }
         }),
