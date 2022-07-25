@@ -25,7 +25,7 @@ export interface BuildLibOptions {
   /**
    * 所有构建结束钩子函数
    */
-  endBuild: () => void;
+  endBuild?: () => void;
   /**
    * 插件钩子函数，请不要使用此字段
    */
