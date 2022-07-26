@@ -84,7 +84,6 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
     return {
       ...viteConfig,
       plugins: [
-        ...(viteConfig ? viteConfig.plugins : []),
         {
           name: 'vite:build-file-transform',
           enforce: 'pre',
@@ -105,6 +104,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
             };
           },
         },
+        ...(viteConfig ? viteConfig.plugins : []),
       ],
       mode: 'production',
       configFile: false,
@@ -160,21 +160,21 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
   singleFileBuildSuccessCallback?.(incrementCount, fileRelativePath);
 }
 
-function removeSuffix(code: string) {
+export function removeSuffix(code: string) {
   let lastCode = code;
-  lastCode = createRemoveSvelteSuffix(lastCode, 'vue');
-  lastCode = createRemoveSvelteSuffix(lastCode, 'svelte');
+  lastCode = createRemoveSuffix(lastCode, 'vue');
+  lastCode = createRemoveSuffix(lastCode, 'svelte');
 
   return lastCode;
 }
 
-export function createRemoveSvelteSuffix(code: string, suffix: string) {
+export function createRemoveSuffix(code: string, suffix: string) {
   let lastCode = code;
-  const match = code.match(new RegExp(`.*import.*from.*\\.${suffix}`, 'g'));
+  const match = code.match(new RegExp(`.*(import|export).*from.*\\.${suffix}`, 'g'));
 
   if (match) {
     lastCode = match.reduce((acc, cur) => {
-      const replaceMatch = cur.match(new RegExp(`(.*)(import.*from.*)\\.${suffix}`));
+      const replaceMatch = cur.match(new RegExp(`(.*)((import|export).*from.*)\\.${suffix}`));
       if (replaceMatch) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, preStr, replaceStr] = replaceMatch;
