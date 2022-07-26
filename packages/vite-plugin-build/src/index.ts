@@ -137,7 +137,7 @@ export function buildPlugin(options: Options = {}): Plugin {
         reporter.buildEndAll();
 
         if (shouldBuildFiles) {
-          renameVueTdsFileName({
+          renameTdsFileName({
             esOutputDir: lastFileBuildOptions.esOutputDir || defaultEsOutputDir,
             commonJsOutputDir: lastFileBuildOptions.commonJsOutputDir || defaultCommonJsOutputDir,
           });
@@ -151,6 +151,11 @@ export function buildPlugin(options: Options = {}): Plugin {
   };
 }
 
+function renameTdsFileName(options: { rootDir?: string; esOutputDir?: string; commonJsOutputDir?: string }) {
+  renameVueTdsFileName(options);
+  renameSvelteTdsFileName(options);
+}
+
 async function renameVueTdsFileName(options: { rootDir?: string; esOutputDir?: string; commonJsOutputDir?: string }) {
   const pkg = require(path.resolve(process.cwd(), 'package.json'));
 
@@ -158,15 +163,41 @@ async function renameVueTdsFileName(options: { rootDir?: string; esOutputDir?: s
     return;
   }
 
+  const { esOutputDir, commonJsOutputDir, rootDir = path.resolve(process.cwd()) } = options;
+  return renameTargetTdsFileName({ rootDir, targetLanguage: 'vue', esOutputDir, commonJsOutputDir });
+}
+
+async function renameSvelteTdsFileName(options: {
+  rootDir?: string;
+  esOutputDir?: string;
+  commonJsOutputDir?: string;
+}) {
+  const pkg = require(path.resolve(process.cwd(), 'package.json'));
+
+  if (!pkg.devDependencies?.['svelte-type-generator'] && !pkg.dependencies?.['svelte-type-generator']) {
+    return;
+  }
+
+  const { esOutputDir, commonJsOutputDir, rootDir = path.resolve(process.cwd()) } = options;
+  return renameTargetTdsFileName({ rootDir, targetLanguage: 'svelte', esOutputDir, commonJsOutputDir });
+}
+
+async function renameTargetTdsFileName(options: {
+  targetLanguage: string;
+  rootDir?: string;
+  esOutputDir?: string;
+  commonJsOutputDir?: string;
+}) {
   try {
-    const { esOutputDir, commonJsOutputDir, rootDir = path.resolve(process.cwd()) } = options;
+    const { targetLanguage, esOutputDir, commonJsOutputDir, rootDir = path.resolve(process.cwd()) } = options;
     // 重命名 vue-tsc 生成的生命文件
     const vueDtsFiles = fg.sync([`${esOutputDir}/**/*.d.ts`, `${commonJsOutputDir}/**/*.d.ts`]);
+    const getTargetDtsFilePath = (targetFilePath: string) => targetFilePath.replace(`.${targetLanguage}.d.ts`, '.d.ts');
     const moveFilesP = vueDtsFiles
       .map((relativeFilePath) => {
         const filePath = path.resolve(rootDir, relativeFilePath);
-        if (filePath.includes('.vue.d.ts')) {
-          return fs.move(filePath, filePath.replace('.vue.d.ts', '.d.ts'));
+        if (filePath.includes(`.${targetLanguage}.d.ts`)) {
+          return fs.move(filePath, getTargetDtsFilePath(filePath));
         }
         return false;
       })
@@ -174,14 +205,14 @@ async function renameVueTdsFileName(options: { rootDir?: string; esOutputDir?: s
     await Promise.all(moveFilesP);
 
     vueDtsFiles.forEach(async (relativeFilePath) => {
-      const filePath = path.resolve(rootDir, relativeFilePath.replace('.vue.d.ts', '.d.ts'));
+      const filePath = path.resolve(rootDir, getTargetDtsFilePath(relativeFilePath));
       const content = await fs.readFile(filePath, { encoding: 'utf8' });
       await fs.writeFile(filePath, removeSuffix(content));
 
       if (new RegExp(`${esOutputDir}/`).test(relativeFilePath)) {
         const copyTargetFilePath = path.resolve(
           rootDir,
-          relativeFilePath.replace('.vue.d.ts', '.d.ts').replace(new RegExp(`^${esOutputDir}`), commonJsOutputDir),
+          getTargetDtsFilePath(relativeFilePath).replace(new RegExp(`^${esOutputDir}`), commonJsOutputDir),
         );
         await fs.copyFile(filePath, copyTargetFilePath);
       }
@@ -189,13 +220,13 @@ async function renameVueTdsFileName(options: { rootDir?: string; esOutputDir?: s
       if (new RegExp(`${commonJsOutputDir}/`).test(relativeFilePath)) {
         const copyTargetFilePath = path.resolve(
           rootDir,
-          relativeFilePath.replace('.vue.d.ts', '.d.ts').replace(new RegExp(`^${commonJsOutputDir}`), esOutputDir),
+          getTargetDtsFilePath(relativeFilePath).replace(new RegExp(`^${commonJsOutputDir}`), esOutputDir),
         );
         await fs.copyFile(filePath, copyTargetFilePath);
       }
     });
   } catch (err) {
-    console.error(colors.red('Vue typescript dts file rename failed.'));
+    console.error(colors.red('Typescript dts file rename failed.'));
     throw err;
   }
 }
