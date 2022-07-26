@@ -1,0 +1,27 @@
+{
+  "private": true,
+  "version": "0.2.2",
+  "name": "vue-ts-example",
+  "author": "samonxian",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "files": [
+    "lib",
+    "es",
+    "dist"
+  ],
+  "scripts": {
+    "tsc": "vue-tsc",
+    "clean": "rimraf lib es dist",
+    "build": "npm run clean && npm run tsc && vite build"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^3.0.1",
+    "rimraf": "^3.0.2",
+    "vue": "^3.2.37",
+    "vue-tsc": "^0.39.0",
+    "vite-plugin-build": "^0.2.2",
+    "vite": "^3.0.2",
+    "typescript": "^4.6.4"
+  }
+}

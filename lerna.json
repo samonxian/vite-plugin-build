@@ -1,5 +1,5 @@
 {
-  "packages": ["packages/*", "examples"],
+  "packages": ["packages/*", "examples/*"],
   "version": "0.2.2",
   "npmClient": "npm",
   "hoist": true

@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "version": "0.2.2",
+  "name": "react-example",
+  "author": "samonxian",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "files": [
+    "lib",
+    "es",
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rimraf lib es dist",
+    "build": "npm run clean && vite build"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^2.0.0",
+    "less": "^4.1.3",
+    "react": "^18.2.0",
+    "rimraf": "^3.0.2",
+    "vite-plugin-build": "^0.2.2",
+    "vite": "^3.0.2"
+  }
+}

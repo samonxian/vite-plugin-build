@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "types": [
+      "vite/client" // 这里需要设置，否则会报错
+    ],
+    "rootDir": "src", // 这里需要设置
+    "emitDeclarationOnly": true, // 只 emit 声明文件
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "declarationDir": "./lib"
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "exclude": ["src/**/__tests__/**", "src/**/*.spec.ts", "src/**/*.spec.tsx"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

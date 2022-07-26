@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "rootDir": "src", // 这里需要设置
+    "emitDeclarationOnly": true, // 只 emit 声明文件
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "declarationDir": "./lib",
+    "jsx": "react"
+  },
+  "include": ["src"],
+  "exclude": ["src/**/__tests__/**", "src/**/*.spec.ts", "src/**/*.spec.tsx"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
