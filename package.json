@@ -21,12 +21,9 @@
     "cm": "git-cz",
     "lint-staged": "lint-staged --allow-empty",
     "commitlint": "commitlint --edit $1",
-    "dev": "npm start",
-    "start": "npm run dev -prefix ./website",
-    "build": "lerna run build",
+    "build": "npm run build -prefix ./packages/vite-plugin-build",
     "bootstrap": "lerna bootstrap --ignore-scripts -- --legacy-peer-deps",
-    "build:publish": "npm run build && lerna publish",
-    "deploy": "npm run deploy -prefix ./website"
+    "build:publish": "npm run build && lerna publish"
   },
   "config": {
     "commitizen": {
