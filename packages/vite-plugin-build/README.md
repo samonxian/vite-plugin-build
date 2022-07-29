@@ -1,8 +1,12 @@
 # vite-plugin-build
 
-<img width="526" alt="" src="https://user-images.githubusercontent.com/1954171/180627715-c75377fa-481e-4184-a546-40e17b6c0f23.png">
+<img width="485" alt="image" src="https://user-images.githubusercontent.com/1954171/181139132-f7915f8c-f222-4fbf-9718-457bf3395af9.png">
 
 vite 库模式插件，支持单个文件转换（vite 的默认模式），还拓展支持整个文件夹的转换（多个输入文件，多个输出文件）。
+
+- 支持多入口文件和多输出文件（文件夹模式）
+- 支持 vanilla、react、vue3、svelte 的代码转换
+- 支持 vanilla、react、vue3、svelte typesript 声明文件生成
 
 ```js
 import { defineConfig } from 'vite';
@@ -12,6 +16,21 @@ export default defineConfig({
   plugins: [buildPlugin()],
 });
 ```
+
+生成声明文件
+
+```js
+import { defineConfig } from 'vite';
+import { buildPlugin } from 'vite-plugin-build';
+
+export default defineConfig({
+  plugins: [buildPlugin({ fileBuild: { emitDeclaration: true } })],
+});
+```
+
+## 在线试用
+
+待补充
 
 ## 选项
 
@@ -25,7 +44,7 @@ export interface Options {
    * vite 库模式配置，指定文件夹下的所有 js 或者 ts 文件转成 commonjs 和 es module 的文件
    * 默认开启此功能
    */
-  fileBuild?: BuildFilesOptions | boolean;
+  fileBuild?: FileBuild | false;
 }
 ```
 
@@ -51,13 +70,47 @@ export interface BuildLibOptions {
 **options.fileBuild**
 
 ```ts
+export interface FileBuild extends BuildFilesOptions {
+  /**
+   * 是否导出 typescript 声明文件
+   */
+  emitDeclaration?: boolean;
+  /**
+   * 是否是 vue 文件构建，配合 emitDeclaration 来处理
+   * 使用官方的插件 @sveltejs/vite-plugin-svelte，默认为 true
+   */
+  isVue?: boolean;
+  /**
+   * 是否是 svelte 文件构建，配合 emitDeclaration 来处理
+   * 使用官方的插件 @vitejs/plugin-vue，默认为 true
+   */
+  isSvelte?: boolean;
+}
+
 export interface BuildFilesOptions {
   /**
-   * 需要转换的输入文件，只支持 glob 语法，默认为 ['src/**/*.{ts,tsx,js,jsx,vue,svelte}'],
+   * 输入文件夹，相对于项目根目录下，格式为 `src` 或者 `src/test`
+   * @defaults src
    */
-  inputs?: string[];
+  inputFolder?: string;
   /**
-   * 忽略的转换文件，只支持 glob 语法，默认为 ['**/*.spec.*', '**/*.test.*', '**/*.d.ts']
+   * 支持转换的文件后缀名
+   * @defaults ['ts', 'tsx', 'js', 'jsx', 'vue', 'svelte']
+   */
+  extensions?: string[];
+  /**
+   * es 文件输出路径，设置为 false 相当于关闭 es 模块的构建
+   * @defaults es
+   */
+  esOutputDir?: string | false;
+  /**
+   * commonjs 文件输出路径，设置为 false 相当于关闭 commonjs 模块的构建
+   * @defaults lib
+   */
+  commonJsOutputDir?: string | false;
+  /**
+   * 忽略的转换文件，只支持 glob 语法
+   * @defaults ['\*\*\/\*.spec.\*', '\*\*\/\*.test.\*', '\*\*\/\*.d.ts']
    */
   ignoreInputs?: string[];
   /**
@@ -86,28 +139,12 @@ export interface BuildFilesOptions {
         isResolved: boolean,
         inputFilePath: string,
       ) => boolean | null | void);
-  /**
-   * 文件只转换为 es 格式，onlyEs 和 onlyCjs 不能同时设置为 true
-   */
-  onlyEs?: boolean;
-  /**
-   * 文件只转换为 commonjs 格式，onlyEs 和 onlyCjs 不能同时设置为 true
-   */
-  onlyCjs?: boolean;
-  /**
-   * es 文件输出路径
-   * @default es
-   */
-  esOutputDir?: string;
-  /**
-   * commonjs 文件输出路径
-   * @default lib
-   */
-  commonJsOutputDir?: string;
 }
 ```
 
 ## 使用例子
+
+可参考 examples 文件夹下的例子。
 
 ### 只支持文件夹转 commonjs
 
