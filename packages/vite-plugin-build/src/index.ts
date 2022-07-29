@@ -124,12 +124,12 @@ export function buildPlugin(options: Options = {}): Plugin {
             return false;
           }
 
+          if (p.name === 'vite:vue') {
+            isVue = true;
+          }
+
           if (Array.isArray(p)) {
             p.forEach((v) => {
-              if (v.name === 'vite:vue') {
-                isVue = true;
-              }
-
               if (v.name === 'vite-plugin-svelte') {
                 isSvelte = true;
               }
