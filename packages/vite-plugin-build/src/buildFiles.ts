@@ -24,8 +24,6 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
     buildOptions,
     rollupOptionsOutput,
     rollupOptionsExternal,
-    onlyCjs,
-    onlyEs,
     singleFileBuildSuccessCallback,
     viteConfig,
     pluginHooks = {},
@@ -33,7 +31,6 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
     commonJsOutputDir = 'lib',
   } = options;
 
-  const lastOnlyEs = !(!onlyEs || (onlyEs && onlyCjs)); // onlyEs 和 onlyCjs 同时为 true 的时候，只转换为 cjs
   const lastBuildOptions = typeof buildOptions === 'function' ? buildOptions(fileRelativePath) : buildOptions;
 
   const extname = path.extname(fileRelativePath);
@@ -104,7 +101,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
             };
           },
         },
-        ...(viteConfig ? viteConfig.plugins : []),
+        ...(viteConfig?.plugins ? viteConfig.plugins : []),
       ],
       mode: 'production',
       configFile: false,
@@ -151,8 +148,8 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
 
   await Promise.all(
     [
-      !lastOnlyEs && lastBuild({ outputDir: commonJsOutputDir, format: 'commonjs' }),
-      !onlyCjs && lastBuild({ outputDir: esOutputDir, format: 'es' }),
+      commonJsOutputDir && lastBuild({ outputDir: commonJsOutputDir, format: 'commonjs' }),
+      esOutputDir && lastBuild({ outputDir: esOutputDir, format: 'es' }),
     ].filter(Boolean),
   );
 
@@ -191,11 +188,28 @@ export function createRemoveSuffix(code: string, suffix: string) {
 
 export interface BuildFilesOptions {
   /**
-   * 需要转换的输入文件，只支持 glob 语法，默认为 ['src/\*\*\/\*\.{ts,tsx,js,jsx,vue,svelte}']
+   * 输入文件夹，相对于项目根目录下，格式为 `src` 或者 `src/test`
+   * @defaults src
    */
-  inputs?: string[];
+  inputFolder?: string;
   /**
-   * 忽略的转换文件，只支持 glob 语法，默认为 ['\*\*\/\*.spec.\*', '\*\*\/\*.test.\*', '\*\*\/\*.d.ts']
+   * 支持转换的文件后缀名
+   * @defaults ['ts', 'tsx', 'js', 'jsx', 'vue', 'svelte']
+   */
+  extensions?: string[];
+  /**
+   * es 文件输出路径，设置为 false 相当于关闭 es 模块的构建
+   * @defaults es
+   */
+  esOutputDir?: string | false;
+  /**
+   * commonjs 文件输出路径，设置为 false 相当于关闭 commonjs 模块的构建
+   * @defaults lib
+   */
+  commonJsOutputDir?: string | false;
+  /**
+   * 忽略的转换文件，只支持 glob 语法
+   * @defaults ['\*\*\/\*.spec.\*', '\*\*\/\*.test.\*', '\*\*\/\*.d.ts']
    */
   ignoreInputs?: string[];
   /**
@@ -225,27 +239,9 @@ export interface BuildFilesOptions {
         inputFilePath: string,
       ) => boolean | null | void);
   /**
-   * 文件只转换为 es 格式，onlyEs 和 onlyCjs 不能同时设置为 true
-   */
-  onlyEs?: boolean;
-  /**
-   * 文件只转换为 commonjs 格式，onlyEs 和 onlyCjs 不能同时设置为 true
-   */
-  onlyCjs?: boolean;
-  /**
    * vite 配置，内置字段，请不要使用此字段
    */
   viteConfig?: UserConfig;
-  /**
-   * es 文件输出路径
-   * @default es
-   */
-  esOutputDir?: string;
-  /**
-   * commonjs 文件输出路径
-   * @default lib
-   */
-  commonJsOutputDir?: string;
   /**
    * 单个文件构建成功后的回调
    * @param incrementCount 当前构建成功的递增统计数
@@ -273,14 +269,21 @@ export interface BuildFilesOptions {
  * @param options 参考 BuildFileOptions interface
  */
 export async function buildFiles(options: BuildFilesOptions = {}) {
-  const { inputs, ignoreInputs, startBuild, endBuild, ...restOptions } = options;
+  const {
+    inputFolder = 'src',
+    extensions = ['ts', 'tsx', 'js', 'jsx', 'vue', 'svelte'],
+    ignoreInputs,
+    startBuild,
+    endBuild,
+    ...restOptions
+  } = options;
   // 获取默认为项目根目录下 src 文件夹包括子文件夹的所有 js、ts、jsx、tsx、vue、sevele 文件路径，除开 .test.*、.spec.* 和 .d.ts 三种后缀名的文件
   // 返回格式为 ['src/**/*.ts', 'src/**/*.tsx']
-  const srcFilePaths = fg.sync(inputs || ['src/**/*.{ts,tsx,js,jsx,vue,svelte}'], {
-    ignore: ignoreInputs || ['**/*.spec.*', '**/*.test.*', '**/*.d.ts'],
+  const srcFilePaths = fg.sync([`${inputFolder}/**/*.{${extensions.join(',')}}`], {
+    ignore: ignoreInputs || [`**/*.spec.*`, '**/*.test.*', '**/*.d.ts'],
   });
 
-  incrementCount = 0; //
+  incrementCount = 0;
   startBuild?.(srcFilePaths.length);
   const buildPromiseAll = srcFilePaths.map((fileRelativePath) => transformFile(fileRelativePath, restOptions));
   await Promise.all(buildPromiseAll);

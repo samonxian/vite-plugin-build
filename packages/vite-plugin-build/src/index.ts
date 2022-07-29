@@ -1,15 +1,30 @@
 import path from 'path';
 import fs from 'fs-extra';
 import type { Plugin, ResolvedConfig } from 'vite';
-import fg from 'fast-glob';
-import colors from 'picocolors';
 import type { BuildFilesOptions } from './buildFiles';
-import { buildFiles, removeSuffix, transformFile } from './buildFiles';
+import { buildFiles, transformFile } from './buildFiles';
 import { InterceptConsole } from './InterceptConsole';
 import type { BuildLibOptions } from './buildLib';
 import { buildLib } from './buildLib';
 import { createReporter } from './reporter';
+import { emitDeclaration } from './emitDeclaration';
 
+export interface FileBuild extends BuildFilesOptions {
+  /**
+   * 是否导出 typescript 声明文件
+   */
+  emitDeclaration?: boolean;
+  /**
+   * 是否是 vue 文件构建，配合 emitDeclaration 来处理
+   * 使用官方的插件 @sveltejs/vite-plugin-svelte，默认为 true
+   */
+  isVue?: boolean;
+  /**
+   * 是否是 svelte 文件构建，配合 emitDeclaration 来处理
+   * 使用官方的插件 @vitejs/plugin-vue，默认为 true
+   */
+  isSvelte?: boolean;
+}
 export interface Options {
   /**
    * vite 库模式配置，入口文件打包成一个文件，不配置则不开启此功能
@@ -19,10 +34,11 @@ export interface Options {
    * vite 库模式配置，指定文件夹下的所有 js 或者 ts 文件转成 commonjs 和 es module 的文件
    * 默认开启此功能
    */
-  fileBuild?: BuildFilesOptions | boolean;
+  fileBuild?: FileBuild | false;
 }
 
 const pluginName = 'vite:build';
+const defaultInputFolder = 'src';
 const defaultEsOutputDir = 'es';
 const defaultCommonJsOutputDir = 'lib';
 let shouldRun = true;
@@ -30,7 +46,7 @@ let reporter: ReturnType<typeof createReporter>;
 export const interceptConsoleInstance = new InterceptConsole();
 
 export function buildPlugin(options: Options = {}): Plugin {
-  const { fileBuild = true, libBuild } = options;
+  const { fileBuild = {}, libBuild } = options;
   let config: ResolvedConfig;
 
   return {
@@ -79,7 +95,10 @@ export function buildPlugin(options: Options = {}): Plugin {
         // 由于 rollup 的动态 import 不支持单变量引入 ts 和 js 文件，同时也存在循环引用问题
         // 所以直接转换 vite 配置文件为临时的 commonjs 格式，在通过 require 引入。
         await transformFile(path.basename(config.configFile), {
-          onlyCjs: true,
+          viteConfig: {
+            logLevel: 'silent',
+          },
+          esOutputDir: false,
           rollupOptionsOutput: { file: tempViteConfigFilePath },
           rollupOptionsExternal(id) {
             if (/^\//.test(id) || /^\\/.test(id) || /^\.\//.test(id) || /^\.\.\//.test(id)) {
@@ -96,13 +115,47 @@ export function buildPlugin(options: Options = {}): Plugin {
           viteConfig = viteConfig({ mode: config.mode, command: config.command });
         }
 
+        let isSvelte = false;
+        let isVue = false;
+
         // 过滤 vite-plugin-build 插件
         viteConfig.plugins = viteConfig.plugins.filter((p: Record<string, any>) => {
           if (p.name === pluginName) {
             return false;
           }
+
+          if (Array.isArray(p)) {
+            p.forEach((v) => {
+              if (v.name === 'vite:vue') {
+                isVue = true;
+              }
+
+              if (v.name === 'vite-plugin-svelte') {
+                isSvelte = true;
+              }
+            });
+          }
+
           return true;
         });
+
+        const shouldBuildFiles = typeof fileBuild === 'object';
+        const lastFileBuildOptions = typeof fileBuild === 'object' ? fileBuild : {};
+        const lastEsOutputDir = lastFileBuildOptions.esOutputDir ?? defaultEsOutputDir;
+        const lastCommonjsOutputDir = lastFileBuildOptions.commonJsOutputDir ?? defaultCommonJsOutputDir;
+
+        if (shouldBuildFiles && fileBuild.emitDeclaration) {
+          // 生成声明文件
+          const { inputFolder = defaultInputFolder } = fileBuild;
+
+          emitDeclaration({
+            rootDir: inputFolder,
+            commonJsOutputDir: lastCommonjsOutputDir,
+            esOutputDir: lastEsOutputDir,
+            isSvelte: fileBuild.isSvelte || isSvelte,
+            isVue: fileBuild.isVue || isVue,
+          });
+        }
 
         const pluginHooks: Plugin = {
           name: 'noop // 无用，为了防止 eslint 报错',
@@ -115,14 +168,12 @@ export function buildPlugin(options: Options = {}): Plugin {
             reporter.writeBundle(output);
           },
         };
-        const shouldBuildFiles = fileBuild === true || typeof fileBuild === 'object' || typeof fileBuild === undefined;
-        const lastFileBuildOptions = typeof fileBuild === 'object' ? fileBuild : {};
         const buildPromise = [
           shouldBuildFiles &&
             buildFiles({
               ...lastFileBuildOptions,
-              esOutputDir: defaultEsOutputDir,
-              commonJsOutputDir: defaultCommonJsOutputDir,
+              esOutputDir: lastEsOutputDir,
+              commonJsOutputDir: lastCommonjsOutputDir,
               viteConfig,
               pluginHooks,
             }),
@@ -135,13 +186,6 @@ export function buildPlugin(options: Options = {}): Plugin {
         ].filter(Boolean);
         await Promise.all(buildPromise);
         reporter.buildEndAll();
-
-        if (shouldBuildFiles) {
-          renameTdsFileName({
-            esOutputDir: lastFileBuildOptions.esOutputDir || defaultEsOutputDir,
-            commonJsOutputDir: lastFileBuildOptions.commonJsOutputDir || defaultCommonJsOutputDir,
-          });
-        }
       } finally {
         // 删除临时的 vite 配置文件
         fs.removeSync(tempViteConfigFilePath);
@@ -149,84 +193,4 @@ export function buildPlugin(options: Options = {}): Plugin {
       interceptConsoleInstance.restore(); // 恢复 console.log 和 console.warn
     },
   };
-}
-
-function renameTdsFileName(options: { rootDir?: string; esOutputDir?: string; commonJsOutputDir?: string }) {
-  renameVueTdsFileName(options);
-  renameSvelteTdsFileName(options);
-}
-
-async function renameVueTdsFileName(options: { rootDir?: string; esOutputDir?: string; commonJsOutputDir?: string }) {
-  const pkg = require(path.resolve(process.cwd(), 'package.json'));
-
-  if (!pkg.devDependencies?.['vue-tsc'] && !pkg.dependencies?.['vue-tsc']) {
-    return;
-  }
-
-  const { esOutputDir, commonJsOutputDir, rootDir = path.resolve(process.cwd()) } = options;
-  return renameTargetTdsFileName({ rootDir, targetLanguage: 'vue', esOutputDir, commonJsOutputDir });
-}
-
-async function renameSvelteTdsFileName(options: {
-  rootDir?: string;
-  esOutputDir?: string;
-  commonJsOutputDir?: string;
-}) {
-  const pkg = require(path.resolve(process.cwd(), 'package.json'));
-
-  if (!pkg.devDependencies?.['svelte-type-generator'] && !pkg.dependencies?.['svelte-type-generator']) {
-    return;
-  }
-
-  const { esOutputDir, commonJsOutputDir, rootDir = path.resolve(process.cwd()) } = options;
-  return renameTargetTdsFileName({ rootDir, targetLanguage: 'svelte', esOutputDir, commonJsOutputDir });
-}
-
-async function renameTargetTdsFileName(options: {
-  targetLanguage: string;
-  rootDir?: string;
-  esOutputDir?: string;
-  commonJsOutputDir?: string;
-}) {
-  try {
-    const { targetLanguage, esOutputDir, commonJsOutputDir, rootDir = path.resolve(process.cwd()) } = options;
-    // 重命名 vue-tsc 生成的生命文件
-    const vueDtsFiles = fg.sync([`${esOutputDir}/**/*.d.ts`, `${commonJsOutputDir}/**/*.d.ts`]);
-    const getTargetDtsFilePath = (targetFilePath: string) => targetFilePath.replace(`.${targetLanguage}.d.ts`, '.d.ts');
-    const moveFilesP = vueDtsFiles
-      .map((relativeFilePath) => {
-        const filePath = path.resolve(rootDir, relativeFilePath);
-        if (filePath.includes(`.${targetLanguage}.d.ts`)) {
-          return fs.move(filePath, getTargetDtsFilePath(filePath));
-        }
-        return false;
-      })
-      .filter(Boolean);
-    await Promise.all(moveFilesP);
-
-    vueDtsFiles.forEach(async (relativeFilePath) => {
-      const filePath = path.resolve(rootDir, getTargetDtsFilePath(relativeFilePath));
-      const content = await fs.readFile(filePath, { encoding: 'utf8' });
-      await fs.writeFile(filePath, removeSuffix(content));
-
-      if (new RegExp(`${esOutputDir}/`).test(relativeFilePath)) {
-        const copyTargetFilePath = path.resolve(
-          rootDir,
-          getTargetDtsFilePath(relativeFilePath).replace(new RegExp(`^${esOutputDir}`), commonJsOutputDir),
-        );
-        await fs.copyFile(filePath, copyTargetFilePath);
-      }
-
-      if (new RegExp(`${commonJsOutputDir}/`).test(relativeFilePath)) {
-        const copyTargetFilePath = path.resolve(
-          rootDir,
-          getTargetDtsFilePath(relativeFilePath).replace(new RegExp(`^${commonJsOutputDir}`), esOutputDir),
-        );
-        await fs.copyFile(filePath, copyTargetFilePath);
-      }
-    });
-  } catch (err) {
-    console.error(colors.red('Typescript dts file rename failed.'));
-    throw err;
-  }
 }

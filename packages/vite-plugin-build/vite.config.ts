@@ -5,7 +5,7 @@ import { buildPlugin } from './src';
 
 export default defineConfig(() => {
   return {
-    plugins: [buildPlugin({ fileBuild: { onlyCjs: true } })],
+    plugins: [buildPlugin({ fileBuild: { esOutputDir: false, emitDeclaration: true } })],
     test: {
       watch: false,
     },
