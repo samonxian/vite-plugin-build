@@ -19,6 +19,9 @@ export default defineConfig({
       ]),
     }),
     buildPlugin({
+      fileBuild: {
+        emitDeclaration: true,
+      },
       libBuild: {
         buildOptions: {
           lib: {

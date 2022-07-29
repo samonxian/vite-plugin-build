@@ -14,7 +14,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "tsc": "svelte-type-generator",
     "clean": "rimraf lib es dist",
-    "build": "npm run clean && npm run tsc && vite build"
+    "build": "npm run clean && vite build"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.1",

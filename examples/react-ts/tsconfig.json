@@ -13,10 +13,6 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "rootDir": "src", // 这里需要设置
-    "emitDeclarationOnly": true, // 只 emit 声明文件
-    "declaration": true /* Generates corresponding '.d.ts' file. */,
-    "declarationDir": "./lib",
     "jsx": "react"
   },
   "include": ["src"],

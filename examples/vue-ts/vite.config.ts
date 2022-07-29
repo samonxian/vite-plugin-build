@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [
     vue(),
     buildPlugin({
+      fileBuild: { emitDeclaration: true },
       libBuild: {
         buildOptions: {
           rollupOptions: {

@@ -10,7 +10,7 @@
 
 <div class="container">
   <div>title</div>
-  <HelloWorld />
+  <HelloWorld title="title" />
 </div>
 
 <style module lang="less">

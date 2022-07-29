@@ -11,9 +11,11 @@
     "dist"
   ],
   "scripts": {
-    "tsc": "vue-tsc",
     "clean": "rimraf lib es dist",
-    "build": "npm run clean && npm run tsc && vite build"
+    "build": "npm run clean && vite build"
+  },
+  "dependencies": {
+    "fs-extra": "^10.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.1",

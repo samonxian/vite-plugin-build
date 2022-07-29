@@ -7,14 +7,17 @@ export default defineConfig({
   plugins: [
     react(),
     buildPlugin({
+      fileBuild: {
+        emitDeclaration: true,
+      },
       libBuild: {
         buildOptions: {
           rollupOptions: {
             external: ['react'],
-            output: { globals: { dayjs: 'React' } },
+            output: { globals: { react: 'React' } },
           },
           lib: {
-            entry: path.resolve(__dirname, 'src/index.tsx'),
+            entry: path.resolve(__dirname, 'src/index.ts'),
             name: 'RbacComponents',
             fileName: (format) => `rbac-components.${format}.js`,
           },

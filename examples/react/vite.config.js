@@ -11,10 +11,10 @@ export default defineConfig({
         buildOptions: {
           rollupOptions: {
             external: ['react'],
-            output: { globals: { dayjs: 'React' } },
+            output: { globals: { react: 'React' } },
           },
           lib: {
-            entry: path.resolve(__dirname, 'src/index.jsx'),
+            entry: path.resolve(__dirname, 'src/index.js'),
             name: 'RbacComponents',
             fileName: (format) => `rbac-components.${format}.js`,
           },
