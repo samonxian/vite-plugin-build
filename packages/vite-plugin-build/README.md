@@ -30,7 +30,10 @@ export default defineConfig({
 
 ## 在线试用
 
-待补充
+- [vanilla-ts](https://stackblitz.com/edit/vite-plugin-build-vanilla-ts-8v9fkj?file=vite.config.ts)
+- [react-ts](https://stackblitz.com/edit/vite-plugin-build-react-ts-bphvr?file=vite.config.ts)
+- [vue-ts](https://stackblitz.com/edit/vite-plugin-build-vue-ts-krtmf?file=vite.config.ts)
+- [svelte-ts](https://stackblitz.com/edit/vite-plugin-build-svelte-ts-63wpkp?file=vite.config.ts)
 
 ## 选项
 
