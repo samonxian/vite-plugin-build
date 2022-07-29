@@ -11,9 +11,8 @@
     "dist"
   ],
   "scripts": {
-    "tsc": "tsc && cpy 'lib/**/*.d.ts' es",
     "clean": "rimraf lib es dist",
-    "build": "npm run clean && npm run tsc && vite build"
+    "build": "npm run clean && vite build"
   },
   "dependencies": {
     "dayjs": "^1.11.4"
