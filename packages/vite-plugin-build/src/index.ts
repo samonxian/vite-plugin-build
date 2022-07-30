@@ -16,12 +16,12 @@ export interface FileBuild extends BuildFilesOptions {
   emitDeclaration?: boolean;
   /**
    * 是否是 vue 文件构建，配合 emitDeclaration 来处理
-   * 使用官方的插件 @sveltejs/vite-plugin-svelte，默认为 true
+   * 使用官方的插件 @vitejs/plugin-vue，默认为 true
    */
   isVue?: boolean;
   /**
    * 是否是 svelte 文件构建，配合 emitDeclaration 来处理
-   * 使用官方的插件 @vitejs/plugin-vue，默认为 true
+   * 使用官方的插件 @sveltejs/vite-plugin-svelte，默认为 true
    */
   isSvelte?: boolean;
 }

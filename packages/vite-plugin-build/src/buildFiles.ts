@@ -226,7 +226,7 @@ export interface BuildFilesOptions {
   /**
    * 和 rollup external 配置一致，
    * 由于 external 不能把自身归属于外部依赖，所以函数模式的参数增加了第四个参数：入口文件相对路径
-   * 重新定义 external 需要这样判断：if(id.includes(fileRelativePath)) { return false }
+   * 重新定义 external 需要这样判断：if(id.includes(path.resolve(fileRelativePath))) { return false }
    */
   rollupOptionsExternal?:
     | (string | RegExp)[]
