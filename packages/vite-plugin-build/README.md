@@ -2,11 +2,13 @@
 
 <img width="485" alt="image" src="https://user-images.githubusercontent.com/1954171/181139132-f7915f8c-f222-4fbf-9718-457bf3395af9.png">
 
+[English](./README.en.md) | 中文
+
 vite 库模式插件，支持单个文件转换（vite 的默认模式），还拓展支持整个文件夹的转换（多个输入文件，多个输出文件）。
 
 - 支持多入口文件和多输出文件（文件夹模式）
 - 支持 vanilla、react、vue3、svelte 的代码转换
-- 支持 vanilla、react、vue3、svelte typescript 声明文件生成
+- 支持 typescript 声明文件生成（vanilla、react、vue3、svelte）
 
 ```js
 import { defineConfig } from 'vite';
@@ -17,7 +19,7 @@ export default defineConfig({
 });
 ```
 
-生成声明文件
+**生成声明文件**
 
 ```js
 import { defineConfig } from 'vite';
@@ -34,6 +36,10 @@ export default defineConfig({
 - [react-ts](https://stackblitz.com/edit/vite-plugin-build-react-ts-bphvr?file=vite.config.ts)
 - [vue-ts](https://stackblitz.com/edit/vite-plugin-build-vue-ts-krtmf?file=vite.config.ts)
 - [svelte-ts](https://stackblitz.com/edit/vite-plugin-build-svelte-ts-63wpkp?file=vite.config.ts)
+
+## 注意
+
+使用此插件后，默认的 vite 配置 build 字段将无效。
 
 ## 选项
 
@@ -80,12 +86,12 @@ export interface FileBuild extends BuildFilesOptions {
   emitDeclaration?: boolean;
   /**
    * 是否是 vue 文件构建，配合 emitDeclaration 来处理
-   * 使用官方的插件 @sveltejs/vite-plugin-svelte，默认为 true
+   * 使用官方的插件 @vitejs/plugin-vue，默认为 true
    */
   isVue?: boolean;
   /**
    * 是否是 svelte 文件构建，配合 emitDeclaration 来处理
-   * 使用官方的插件 @vitejs/plugin-vue，默认为 true
+   * 使用官方的插件 @sveltejs/vite-plugin-svelte，默认为 true
    */
   isSvelte?: boolean;
 }
@@ -130,7 +136,7 @@ export interface BuildFilesOptions {
   /**
    * 和 rollup external 配置一致，
    * 由于 external 不能把自身归属于外部依赖，所以函数模式的参数增加了第四个参数：入口文件相对路径
-   * 重新定义 external 需要这样判断：if(id.includes(fileRelativePath)) { return false }
+   * 重新定义 external 需要这样判断：if(id.includes(path.resolve(fileRelativePath))) { return false }
    */
   rollupOptionsExternal?:
     | (string | RegExp)[]
@@ -202,20 +208,14 @@ export default defineConfig({
 
 ```js
 function external(id) {
-  if (
-    id.includes('.less') ||
-    id.includes('.css') ||
-    id.includes('.svg') ||
-    // fileRelativePath 是当前入口文件
-    id === path.resolve(process.cwd(), fileRelativePath)
-  ) {
+  if (isAsset() || isVueTempFile(id) || id === path.resolve(process.cwd(), fileRelativePath)) {
     return false;
   }
   return true;
 }
 ```
 
-less、css、svg 则会打包，其他都当中外包依赖包，如果有其他需求，需要自己配置。
+less、css、svg 文件会打包，其他都当中外包依赖包，如果有其他需求，需要自己配置。
 
 ```js
 import { defineConfig } from 'vite';
@@ -241,15 +241,13 @@ export default defineConfig({
 });
 ```
 
-### 修改转换的入口文件夹
-
-入口文件支持 glob 语法。
+### 修改输入文件
 
 ```js
 import { defineConfig } from 'vite';
 import { buildPlugin } from 'vite-plugin-build';
 
 export default defineConfig({
-  plugins: [buildPlugin({ fileBuild: { inputs: [['node/**/*.mjs']] } })],
+  plugins: [buildPlugin({ fileBuild: { inputFolder: 'main' } })],
 });
 ```
