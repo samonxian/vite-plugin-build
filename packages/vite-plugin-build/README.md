@@ -6,7 +6,7 @@ vite 库模式插件，支持单个文件转换（vite 的默认模式），还�
 
 - 支持多入口文件和多输出文件（文件夹模式）
 - 支持 vanilla、react、vue3、svelte 的代码转换
-- 支持 vanilla、react、vue3、svelte typesript 声明文件生成
+- 支持 vanilla、react、vue3、svelte typescript 声明文件生成
 
 ```js
 import { defineConfig } from 'vite';
