@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
+import { normalizePath } from 'vite';
 import type { Plugin, ResolvedConfig } from 'vite';
 import type { BuildFilesOptions } from './buildFiles';
 import { buildFiles, transformFile } from './buildFiles';
@@ -101,7 +102,14 @@ export function buildPlugin(options: Options = {}): Plugin {
           esOutputDir: false,
           rollupOptionsOutput: { file: tempViteConfigFilePath },
           rollupOptionsExternal(id) {
-            if (/^\//.test(id) || /^\\/.test(id) || /^\.\//.test(id) || /^\.\.\//.test(id)) {
+            const normalizeId = normalizePath(id);
+            if (
+              /^\//.test(id) ||
+              /^\\/.test(id) ||
+              /^\.\//.test(id) ||
+              /^\.\.\//.test(id) ||
+              normalizeId === config.configFile
+            ) {
               // 本地文件则一起打包到一个文件中
               return false;
             }

@@ -50,7 +50,13 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
         return id.includes('.less') || id.includes('.css') || id.includes('.svg');
       }
 
-      if (isAsset() || isVueTempFile(id) || id === path.resolve(process.cwd(), fileRelativePath)) {
+      if (
+        isAsset() ||
+        isVueTempFile(id) ||
+        // 由于 id 会输出两次（原因未知），windows 下的两次路径还不一致，所以要特殊处理
+        // 注意 path.normaLize 和 vite.normalizePath 的行为是不一样的
+        path.normalize(id) === path.resolve(process.cwd(), fileRelativePath)
+      ) {
         return false;
       }
       return true;
@@ -120,6 +126,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
           ],
         },
         lib: {
+          formats: ['cjs'],
           entry: path.resolve(process.cwd(), fileRelativePath),
           name: 'noop', // 这里设置只有在 UMD 格式才有效，避免验证报错才设置的，在这里没用
         },
