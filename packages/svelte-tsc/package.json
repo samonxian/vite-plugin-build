@@ -1,5 +1,5 @@
 {
-  "version": "0.3.2",
+  "version": "0.3.3",
   "name": "svelte-tsc",
   "author": "samonxian",
   "main": "lib/svelte-typescript.js",
@@ -19,6 +19,6 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.6.4",
     "vite": "^3.0.2",
-    "vite-plugin-build": "^0.3.2"
+    "vite-plugin-build": "^0.3.3"
   }
 }
