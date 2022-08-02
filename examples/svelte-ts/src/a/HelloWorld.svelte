@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script lang="ts">
   /**
    * 标题2
    */
