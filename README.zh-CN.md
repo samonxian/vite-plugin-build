@@ -2,7 +2,7 @@
 
 <img width="485" alt="image" src="https://user-images.githubusercontent.com/1954171/181139132-f7915f8c-f222-4fbf-9718-457bf3395af9.png">
 
-[English](./README.en.md) | 中文
+[English](./README.md) | 中文
 
 vite 库模式插件，支持单个文件转换（vite 的默认模式），还拓展支持整个文件夹的转换（多个输入文件，多个输出文件）。
 

@@ -2,7 +2,7 @@
 
 <img width="485" alt="image" src="https://user-images.githubusercontent.com/1954171/181139132-f7915f8c-f222-4fbf-9718-457bf3395af9.png">
 
-English | [中文](./README.md)
+English | [中文](./README.zh-CN.md)
 
 The Vite library Mode plugin, which supports single file transform (the default mode for Vite) ,
 also support entire folders transform (multiple input files and multiple output files).
