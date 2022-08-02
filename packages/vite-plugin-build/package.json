@@ -3,6 +3,7 @@
   "name": "vite-plugin-build",
   "author": "samonxian",
   "main": "lib/index.js",
+  "description": "Transfom the whole folder in library mode.",
   "files": [
     "lib"
   ],
