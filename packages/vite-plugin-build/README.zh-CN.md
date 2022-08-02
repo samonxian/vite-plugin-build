@@ -2,25 +2,24 @@
 
 <img width="485" alt="image" src="https://user-images.githubusercontent.com/1954171/181139132-f7915f8c-f222-4fbf-9718-457bf3395af9.png">
 
-English | [中文](./README.md)
+[English](./README.en.md) | 中文
 
-The Vite library Mode plugin, which supports single file transform (the default mode for Vite) ,
-also support entire folders transform (multiple input files and multiple output files).
+vite 库模式插件，支持单个文件转换（vite 的默认模式），还拓展支持整个文件夹的转换（多个输入文件，多个输出文件）。
 
-- support multiple input files and multiple output files（folder mode）
-- support vanilla,react,vue3 and svelte code transform
-- support emitting typescript declaration files (vanilla,react,vue3 and svelte)
+- 支持多入口文件和多输出文件（文件夹模式）
+- 支持 vanilla、react、vue3、svelte 的代码转换
+- 支持 typescript 声明文件生成（vanilla、react、vue3、svelte）
 
-````js
+```js
 import { defineConfig } from 'vite';
 import { buildPlugin } from 'vite-plugin-build';
 
 export default defineConfig({
   plugins: [buildPlugin()],
 });
-``
+```
 
-**emit declaration file**
+**生成声明文件**
 
 ```js
 import { defineConfig } from 'vite';
@@ -29,31 +28,30 @@ import { buildPlugin } from 'vite-plugin-build';
 export default defineConfig({
   plugins: [buildPlugin({ fileBuild: { emitDeclaration: true } })],
 });
-````
+```
 
-## Online Demo
+## 在线试用
 
 - [vanilla-ts](https://stackblitz.com/edit/vite-plugin-build-vanilla-ts-8v9fkj?file=vite.config.ts)
 - [react-ts](https://stackblitz.com/edit/vite-plugin-build-react-ts-bphvr?file=vite.config.ts)
 - [vue-ts](https://stackblitz.com/edit/vite-plugin-build-vue-ts-krtmf?file=vite.config.ts)
 - [svelte-ts](https://stackblitz.com/edit/vite-plugin-build-svelte-ts-63wpkp?file=vite.config.ts)
 
-## Warning
+## 注意
 
-When using this plugin, the config build field of vite configuration will not work.
+使用此插件后，默认的 vite 配置 build 字段将无效。
 
-## Options
+## 选项
 
 ```ts
 export interface Options {
   /**
-   * Vite library mode setting,the entry file is bundled as a file,
-   * and this feature is not enabled if it is not configured.
+   * vite 库模式配置，入口文件打包成一个文件，不配置则不开启此功能
    */
   libBuild?: BuildLibOptions;
   /**
-   * Vite library mode setting，which will transfrom all js or ts files in the specified folder to commonjs and es module files.
-   * This feature is enabled by default.
+   * vite 库模式配置，指定文件夹下的所有 js 或者 ts 文件转成 commonjs 和 es module 的文件
+   * 默认开启此功能
    */
   fileBuild?: FileBuild | false;
 }
@@ -64,15 +62,15 @@ export interface Options {
 ```ts
 export interface BuildLibOptions {
   /**
-   * The files is only tansformed to es format, onlyEs and onlyCjs cannot be set to true at the same time.
+   * 文件只转换为 es 格式，onlyEs 和 onlyCjs 不能同时设置为 true
    */
   onlyEs?: boolean;
   /**
-   * The files is only tansformed to commonjs format, onlyEs and onlyCjs cannot be set to true at the same time.
+   * 文件只转换为 commonjs 格式，onlyEs 和 onlyCjs 不能同时设置为 true
    */
   onlyCjs?: boolean;
   /**
-   * Same as vite configuration field build.
+   * 同 vite 配置字段 build
    */
   buildOptions: BuildOptions;
 }
@@ -83,63 +81,62 @@ export interface BuildLibOptions {
 ```ts
 export interface FileBuild extends BuildFilesOptions {
   /**
-   * Whether to emit typescript declaration files
+   * 是否导出 typescript 声明文件
    */
   emitDeclaration?: boolean;
   /**
-   * Whether it is a vue file build, it is processed with emitDeclaration.
-   * Whe using the official plugin @vitejs/plugin-vue,the default value is true.
+   * 是否是 vue 文件构建，配合 emitDeclaration 来处理
+   * 使用官方的插件 @vitejs/plugin-vue，默认为 true
    */
   isVue?: boolean;
   /**
-   * Whether it is a vue file build, it is processed with emitDeclaration.
-   * Whe using the official plugin @sveltejs/vite-plugin-svelte,the default value is true.
+   * 是否是 svelte 文件构建，配合 emitDeclaration 来处理
+   * 使用官方的插件 @sveltejs/vite-plugin-svelte，默认为 true
    */
   isSvelte?: boolean;
 }
 
 export interface BuildFilesOptions {
   /**
-   * The input folder，relative to the project root directory，the format is `src` or `src/test`.
+   * 输入文件夹，相对于项目根目录下，格式为 `src` 或者 `src/test`
    * @defaults src
    */
   inputFolder?: string;
   /**
-   * The supported file extensions for transforming.
+   * 支持转换的文件后缀名
    * @defaults ['ts', 'tsx', 'js', 'jsx', 'vue', 'svelte']
    */
   extensions?: string[];
   /**
-   * The es files output path, when setting it to false,it will close the building of the es module.
+   * es 文件输出路径，设置为 false 相当于关闭 es 模块的构建
    * @defaults es
    */
   esOutputDir?: string | false;
   /**
-   * The commonjs files output path, when setting it to false,it will close the building of the commonjs module.
+   * commonjs 文件输出路径，设置为 false 相当于关闭 commonjs 模块的构建
    * @defaults lib
    */
   commonJsOutputDir?: string | false;
   /**
-   * The ignored transform files, only glob syntax is supported.
+   * 忽略的转换文件，只支持 glob 语法
    * @defaults ['\*\*\/\*.spec.\*', '\*\*\/\*.test.\*', '\*\*\/\*.d.ts']
    */
   ignoreInputs?: string[];
   /**
-   * This configuration will override the build configuration in vite config.
-   * It is recommended to use rollupOptionsOutput, rollupOptionsExternal and other field configurations first.
-   * Support function, the first parameter is the entry file path.
+   * 此配置会覆盖所有当前构建中 vite config 中 build 配置，
+   * 建议优先使用 rollupOptionsOutput、rollupOptionsExternal等其他字段配置
+   * 支持函数，第一个参数是入口文件路径
    */
   buildOptions?: BuildOptions | ((inputFilePath: string) => BuildOptions);
   /**
-   * Consistent with the rollup output configuration, it will work on both commonjs and es output configuration.
-   * Support function, the first parameter is the ouput file path.
+   * 和 rollup output 配置一致，会同时作用在 commonjs 和 es output 配置
+   * 支持函数，第一个参数是转换的文件路径
    */
   rollupOptionsOutput?: OutputOptions | ((outputFilePath: string) => OutputOptions);
   /**
-   * Consistent with rollup external configuration.
-   * Since external cannot attribute itself to external dependencies,
-   * a fourth parameter is added to the parameters of the function mode: the relative path of the entry file.
-   * Redefining external requires this judgment：if(id.includes(path.resolve(fileRelativePath))) { return false }
+   * 和 rollup external 配置一致，
+   * 由于 external 不能把自身归属于外部依赖，所以函数模式的参数增加了第四个参数：入口文件相对路径
+   * 重新定义 external 需要这样判断：if(id.includes(path.resolve(fileRelativePath))) { return false }
    */
   rollupOptionsExternal?:
     | (string | RegExp)[]
@@ -154,14 +151,13 @@ export interface BuildFilesOptions {
 }
 ```
 
-## Usage Examples
+## 使用例子
 
-See the examples in the examples folder.
+可参考 examples 文件夹下的例子。
 
-### Only support folder to commonjs format
+### 只支持文件夹转 commonjs
 
-This is an extended function, which is not supported by vite itself.
-The default transforming folder is the src folder of the root directory.
+这是拓展的功能，vite 本身不支持，默认转换文件夹是根目录的 src 文件夹。
 
 ```js
 import { defineConfig } from 'vite';
@@ -172,9 +168,9 @@ export default defineConfig({
 });
 ```
 
-### Supports converting a single entry file to umd format
+### 支持单个入口文件转换为 umd 格式
 
-This is the vite library mode that vite natively supports.
+这是 vite 本身支持的 vite 库模式。
 
 ```js
 import { defineConfig } from 'vite';
@@ -206,9 +202,9 @@ export default defineConfig({
 });
 ```
 
-### Folder mode configuration of `external`
+### 文件夹转换模式配置 external
 
-The default external of folder mode is as follows:
+文件夹转换模式默认的 external 默认如下：
 
 ```js
 function external(id) {
@@ -219,8 +215,7 @@ function external(id) {
 }
 ```
 
-The less, css, and svg will be bundled, and others are outsourced.
-If you have other requirements, you need to configure them yourself.
+less、css、svg 文件会打包，其他都当中外包依赖包，如果有其他需求，需要自己配置。
 
 ```js
 import { defineConfig } from 'vite';
@@ -246,7 +241,7 @@ export default defineConfig({
 });
 ```
 
-### Change the input folder
+### 修改输入文件
 
 ```js
 import { defineConfig } from 'vite';
