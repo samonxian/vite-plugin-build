@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import type { Plugin, UserConfig } from 'vite';
+import type { Plugin, ResolvedConfig, UserConfig } from 'vite';
 import type { BuildFilesOptions } from './buildFiles';
 import { buildFiles } from './buildFiles';
 import { InterceptConsole } from './InterceptConsole';
@@ -47,6 +47,7 @@ export const interceptConsoleInstance = new InterceptConsole();
 export function buildPlugin(options: Options = {}): Plugin {
   const { fileBuild = {}, libBuild } = options;
   let userConfig: UserConfig;
+  let resolvedConfig: ResolvedConfig;
   let isSvelte = false;
   let isVue = false;
 
@@ -98,8 +99,9 @@ export function buildPlugin(options: Options = {}): Plugin {
       userConfig = config;
     },
 
-    configResolved(resolvedConfig) {
-      reporter = createReporter(resolvedConfig);
+    configResolved(config) {
+      reporter = createReporter(config);
+      resolvedConfig = config;
     },
 
     buildStart() {
@@ -122,6 +124,7 @@ export function buildPlugin(options: Options = {}): Plugin {
           esOutputDir: lastEsOutputDir,
           isSvelte: fileBuild.isSvelte || isSvelte,
           isVue: fileBuild.isVue || isVue,
+          resolvedConfig,
         });
       }
 

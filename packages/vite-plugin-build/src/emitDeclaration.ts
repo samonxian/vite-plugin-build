@@ -3,9 +3,11 @@ import spawn from 'cross-spawn';
 import fs from 'fs-extra';
 import fg from 'fast-glob';
 import colors from 'picocolors';
+import type { ResolvedConfig } from 'vite';
 import { removeSuffix } from './buildFiles';
 import type { BuildFilesOptions } from './buildFiles';
 import { restoreConsole } from './InterceptConsole';
+import { LogLevels } from './reporter';
 
 export function emitDeclaration(options: {
   rootDir?: string;
@@ -13,12 +15,15 @@ export function emitDeclaration(options: {
   commonJsOutputDir?: BuildFilesOptions['commonJsOutputDir'];
   isVue?: boolean;
   isSvelte?: boolean;
+  resolvedConfig: ResolvedConfig;
 }) {
-  const { rootDir, esOutputDir, commonJsOutputDir, isSvelte, isVue } = options;
+  const { rootDir, esOutputDir, commonJsOutputDir, resolvedConfig, isSvelte, isVue } = options;
   const outputDir = commonJsOutputDir || esOutputDir;
+  const shouldLogInfo = LogLevels[resolvedConfig.logLevel || 'info'] >= LogLevels.info;
 
   if (outputDir && rootDir) {
-    restoreConsole.log(colors.cyan('emitting the declaration files...'));
+    shouldLogInfo && restoreConsole.log(colors.cyan('emitting the declaration files...'));
+
     if (isSvelte) {
       // @ts-ignore
       // eslint-disable-next-line
