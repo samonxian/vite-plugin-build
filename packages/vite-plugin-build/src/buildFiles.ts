@@ -287,7 +287,7 @@ export async function buildFiles(options: BuildFilesOptions = {}) {
   // 获取默认为项目根目录下 src 文件夹包括子文件夹的所有 js、ts、jsx、tsx、vue、sevele 文件路径，除开 .test.*、.spec.* 和 .d.ts 三种后缀名的文件
   // 返回格式为 ['src/**/*.ts', 'src/**/*.tsx']
   const srcFilePaths = fg.sync([`${inputFolder}/**/*.{${extensions.join(',')}}`], {
-    ignore: ignoreInputs || [`**/*.spec.*`, '**/*.test.*', '**/*.d.ts'],
+    ignore: ignoreInputs || [`**/*.spec.*`, '**/*.test.*', '**/*.d.ts', '**/__tests__/**'],
   });
 
   incrementCount = 0;
