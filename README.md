@@ -11,14 +11,14 @@ also support entire folders transform (multiple input files and multiple output 
 - support vanilla,react,vue3 and svelte code transform
 - support emitting typescript declaration files (vanilla,react,vue3 and svelte)
 
-````js
+```js
 import { defineConfig } from 'vite';
 import { buildPlugin } from 'vite-plugin-build';
 
 export default defineConfig({
   plugins: [buildPlugin()],
 });
-``
+```
 
 **emit declaration file**
 
@@ -29,7 +29,7 @@ import { buildPlugin } from 'vite-plugin-build';
 export default defineConfig({
   plugins: [buildPlugin({ fileBuild: { emitDeclaration: true } })],
 });
-````
+```
 
 ## Online Demo
 
