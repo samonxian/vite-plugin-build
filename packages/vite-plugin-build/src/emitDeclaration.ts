@@ -43,16 +43,8 @@ export function emitDeclaration(options: {
       );
 
       spawn.sync(
-        'node',
-        [
-          isVue ? vueTscPath : tscPath,
-          '--rootDir',
-          rootDir,
-          '--declaration',
-          '--emitDeclarationOnly',
-          '--declarationDir',
-          outputDir,
-        ],
+        isVue ? vueTscPath : tscPath,
+        ['--rootDir', rootDir, '--declaration', '--emitDeclarationOnly', '--declarationDir', outputDir],
         {
           stdio: 'ignore',
         },
