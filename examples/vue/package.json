@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.3.4",
+  "version": "0.4.0",
   "name": "vue-example",
   "author": "samonxian",
   "main": "lib/index.js",
@@ -18,7 +18,7 @@
     "@vitejs/plugin-vue": "^3.0.1",
     "rimraf": "^3.0.2",
     "vite": "^3.0.2",
-    "vite-plugin-build": "^0.3.4",
+    "vite-plugin-build": "^0.4.0",
     "vue": "^3.2.37"
   }
 }
