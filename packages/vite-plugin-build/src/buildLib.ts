@@ -17,7 +17,7 @@ export interface BuildLibOptions {
   /**
    * 同 vite 配置字段 build
    */
-  buildOptions: BuildOptions;
+  buildOptions: BuildOptions | BuildOptions[];
   /**
    * 构建开始钩子函数，第一个参数 totalFilesCount 是转换文件的总数
    */
@@ -42,19 +42,24 @@ export async function buildLib(options: BuildLibOptions) {
   }, {});
 
   startBuild?.();
-  await build({
-    ...viteConfig,
-    plugins: [
-      ...(viteConfig ? viteConfig.plugins : []),
-      {
-        name: 'vite:build-lib-transform',
-        ...lastPluginHooks,
-      },
-    ],
-    mode: 'production',
-    configFile: false,
-    logLevel: 'error',
-    build: buildOptions,
+
+  const lastBuildOptions = [].concat(buildOptions);
+  const buildPs = lastBuildOptions.map((buildOption) => {
+    return build({
+      ...viteConfig,
+      plugins: [
+        ...(viteConfig ? viteConfig.plugins : []),
+        {
+          name: 'vite:build-lib-transform',
+          ...lastPluginHooks,
+        },
+      ],
+      mode: 'production',
+      configFile: false,
+      logLevel: 'error',
+      build: buildOption,
+    });
   });
+  await Promise.all(buildPs);
   endBuild?.();
 }
