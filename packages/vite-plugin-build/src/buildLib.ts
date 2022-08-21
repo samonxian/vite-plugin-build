@@ -3,14 +3,6 @@ import { build } from 'vite';
 
 export interface BuildLibOptions {
   /**
-   * 文件只转换为 es 格式，onlyEs 和 onlyCjs 不能同时设置为 true
-   */
-  onlyEs?: boolean;
-  /**
-   * 文件只转换为 commonjs 格式，onlyEs 和 onlyCjs 不能同时设置为 true
-   */
-  onlyCjs?: boolean;
-  /**
    * vite 配置，内置字段，请不要使用此字段
    */
   viteConfig?: UserConfig;
@@ -43,7 +35,9 @@ export async function buildLib(options: BuildLibOptions) {
 
   startBuild?.();
 
-  const lastBuildOptions = [].concat(buildOptions);
+  const lastBuildOptions = [].concat(buildOptions).map((c: BuildOptions) => {
+    return { ...c, emptyOutDir: false };
+  });
   const buildPs = lastBuildOptions.map((buildOption) => {
     return build({
       ...viteConfig,
