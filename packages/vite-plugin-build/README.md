@@ -5,11 +5,14 @@
 English | [中文](./README.zh-CN.md)
 
 The Vite library Mode plugin, which supports single file transform (the default mode for Vite) ,
-also support entire folders transform (multiple input files and multiple output files).
+also support the multiple inputs outputs mode and the folder transform mode.
 
-- support multiple input files and multiple output files（folder mode）
-- support vanilla,react,vue3 and svelte code transform
-- support emitting typescript declaration files (vanilla,react,vue3 and svelte)
+- Support multiple input files and multiple output files（multiple inputs outputs mode）
+- Support transfoming the whole folder (folder transform mode)
+- Support vanilla,react,vue3 and svelte code transform
+- Support emitting typescript declaration files (vanilla,react,vue3 and svelte)
+
+**Default folder mode**
 
 ```js
 import { defineConfig } from 'vite';
@@ -20,7 +23,7 @@ export default defineConfig({
 });
 ```
 
-**emit declaration file**
+**Emit declaration file**
 
 ```js
 import { defineConfig } from 'vite';
@@ -28,6 +31,41 @@ import { buildPlugin } from 'vite-plugin-build';
 
 export default defineConfig({
   plugins: [buildPlugin({ fileBuild: { emitDeclaration: true } })],
+});
+```
+
+**Multiple inputs outputs mode**
+
+```js
+import { defineConfig } from 'vite';
+import { buildPlugin } from 'vite-plugin-build';
+
+export default defineConfig({
+  plugins: [
+    buildPlugin({
+      fileBuild: false,
+      libBuild: {
+        buildOptions: [
+          {
+            lib: {
+              entry: path.resolve(__dirname, 'src/a.ts'),
+              name: 'A',
+              formats: ['umd'],
+              fileName: () => `a.js`,
+            },
+          },
+          {
+            lib: {
+              entry: path.resolve(__dirname, 'src/b.ts'),
+              name: 'b',
+              formats: ['umd'],
+              fileName: () => `b.js`,
+            },
+          },
+        ],
+      },
+    }),
+  ],
 });
 ```
 
@@ -63,14 +101,6 @@ export interface Options {
 
 ```ts
 export interface BuildLibOptions {
-  /**
-   * The files is only tansformed to es format, onlyEs and onlyCjs cannot be set to true at the same time.
-   */
-  onlyEs?: boolean;
-  /**
-   * The files is only tansformed to commonjs format, onlyEs and onlyCjs cannot be set to true at the same time.
-   */
-  onlyCjs?: boolean;
   /**
    * Same as vite configuration field build.
    */

@@ -4,11 +4,14 @@
 
 [English](./README.md) | 中文
 
-vite 库模式插件，支持单个文件转换（vite 的默认模式），还拓展支持整个文件夹的转换（多个输入文件，多个输出文件）。
+vite 库模式插件，支持单个文件转换（vite 的默认模式），支持多个输入文件多个输出文件模式，也支持整个文件夹的转换模式。
 
-- 支持多入口文件和多输出文件（文件夹模式）
+- 支持多入口文件和多输出文件
+- 支持整个文件夹转换
 - 支持 vanilla、react、vue3、svelte 的代码转换
 - 支持 typescript 声明文件生成（vanilla、react、vue3、svelte）
+
+**默认文件夹模式**
 
 ```js
 import { defineConfig } from 'vite';
@@ -27,6 +30,41 @@ import { buildPlugin } from 'vite-plugin-build';
 
 export default defineConfig({
   plugins: [buildPlugin({ fileBuild: { emitDeclaration: true } })],
+});
+```
+
+**多输入多输出模式**
+
+```js
+import { defineConfig } from 'vite';
+import { buildPlugin } from 'vite-plugin-build';
+
+export default defineConfig({
+  plugins: [
+    buildPlugin({
+      fileBuild: false,
+      libBuild: {
+        buildOptions: [
+          {
+            lib: {
+              entry: path.resolve(__dirname, 'src/a.ts'),
+              name: 'A',
+              formats: ['umd'],
+              fileName: () => `a.js`,
+            },
+          },
+          {
+            lib: {
+              entry: path.resolve(__dirname, 'src/b.ts'),
+              name: 'b',
+              formats: ['umd'],
+              fileName: () => `b.js`,
+            },
+          },
+        ],
+      },
+    }),
+  ],
 });
 ```
 
@@ -62,17 +100,9 @@ export interface Options {
 ```ts
 export interface BuildLibOptions {
   /**
-   * 文件只转换为 es 格式，onlyEs 和 onlyCjs 不能同时设置为 true
+   * 同 vite 配置字段 build，同时支持数组配置，支持多输入多输出
    */
-  onlyEs?: boolean;
-  /**
-   * 文件只转换为 commonjs 格式，onlyEs 和 onlyCjs 不能同时设置为 true
-   */
-  onlyCjs?: boolean;
-  /**
-   * 同 vite 配置字段 build
-   */
-  buildOptions: BuildOptions;
+  buildOptions: BuildOptions | BuildOptions[];
 }
 ```
 
