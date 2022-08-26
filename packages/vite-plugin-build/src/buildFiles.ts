@@ -28,6 +28,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
     viteConfig,
     pluginHooks = {},
     formats = ['cjs', 'es'],
+    watch = null,
   } = options;
 
   const lastBuildOptions = typeof buildOptions === 'function' ? buildOptions(fileRelativePath) : buildOptions;
@@ -132,6 +133,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
         },
         minify: false,
         ...lastBuildOptions,
+        watch,
       },
     };
   }
@@ -210,6 +212,10 @@ export interface BuildFilesOptions {
    * @defaults [{ format: 'cjs', outDir: commonJsOutputDir }, { format: 'es', outDir: esOutputDir }]
    */
   formats?: Format[];
+  /**
+   * 设置监听构建，同 vite build.watch
+   */
+  watch?: BuildOptions['watch'];
   /**
    * 支持转换的文件后缀名
    * @defaults ['ts', 'tsx', 'js', 'jsx', 'vue', 'svelte']

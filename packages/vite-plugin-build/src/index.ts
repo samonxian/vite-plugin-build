@@ -143,7 +143,7 @@ export function buildPlugin(options: Options = {}): Plugin {
         });
       }
 
-      if (shouldBuildFiles && fileBuild.emitDeclaration) {
+      if (shouldBuildFiles && lastFileBuildOptions.emitDeclaration) {
         // 生成声明文件
         const { inputFolder = defaultInputFolder } = fileBuild;
 
@@ -151,8 +151,8 @@ export function buildPlugin(options: Options = {}): Plugin {
           rootDir: inputFolder,
           commonJsOutputDir: lastCommonjsOutputDir,
           esOutputDir: lastEsOutputDir,
-          isSvelte: fileBuild.isSvelte || isSvelte,
-          isVue: fileBuild.isVue || isVue,
+          isSvelte: lastFileBuildOptions.isSvelte || isSvelte,
+          isVue: lastFileBuildOptions.isVue || isVue,
           resolvedConfig,
         });
       }
