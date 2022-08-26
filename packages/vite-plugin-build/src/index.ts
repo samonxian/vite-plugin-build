@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import type { Plugin, ResolvedConfig, UserConfig } from 'vite';
-import type { BuildFilesOptions } from './buildFiles';
+import type { BuildFilesOptions, Format } from './buildFiles';
 import { buildFiles } from './buildFiles';
 import { InterceptConsole } from './InterceptConsole';
 import type { BuildLibOptions } from './buildLib';
@@ -111,8 +111,37 @@ export function buildPlugin(options: Options = {}): Plugin {
     async closeBundle() {
       const shouldBuildFiles = typeof fileBuild === 'object';
       const lastFileBuildOptions = typeof fileBuild === 'object' ? fileBuild : {};
-      const lastEsOutputDir = lastFileBuildOptions.esOutputDir ?? defaultEsOutputDir;
-      const lastCommonjsOutputDir = lastFileBuildOptions.commonJsOutputDir ?? defaultCommonJsOutputDir;
+      let lastEsOutputDir = lastFileBuildOptions.esOutputDir ?? defaultEsOutputDir;
+      let lastCommonjsOutputDir = lastFileBuildOptions.commonJsOutputDir ?? defaultCommonJsOutputDir;
+
+      if (!lastFileBuildOptions.formats) {
+        lastFileBuildOptions.formats = [
+          lastCommonjsOutputDir && {
+            format: 'cjs',
+            outDir: lastCommonjsOutputDir,
+          },
+          lastEsOutputDir && {
+            format: 'es',
+            outDir: lastEsOutputDir,
+          },
+        ].filter(Boolean) as Format[];
+      } else {
+        lastCommonjsOutputDir = false;
+        lastEsOutputDir = false;
+        lastFileBuildOptions.formats.forEach((format) => {
+          if (typeof format === 'string') {
+            format = { format, outDir: format };
+          }
+
+          if (format.format === 'cjs') {
+            lastCommonjsOutputDir = format.outDir;
+          }
+
+          if (format.format === 'es') {
+            lastEsOutputDir = format.outDir;
+          }
+        });
+      }
 
       if (shouldBuildFiles && fileBuild.emitDeclaration) {
         // 生成声明文件
@@ -143,8 +172,6 @@ export function buildPlugin(options: Options = {}): Plugin {
         shouldBuildFiles &&
           buildFiles({
             ...lastFileBuildOptions,
-            esOutputDir: lastEsOutputDir,
-            commonJsOutputDir: lastCommonjsOutputDir,
             viteConfig: userConfig,
             pluginHooks,
           }),

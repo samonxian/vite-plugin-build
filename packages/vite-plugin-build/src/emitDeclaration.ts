@@ -25,8 +25,6 @@ export function emitDeclaration(options: {
     shouldLogInfo && restoreConsole.log(colors.cyan('emitting the declaration files...'));
 
     if (isSvelte) {
-      // @ts-ignore
-      // eslint-disable-next-line
       const { compile } = require('svelte-tsc');
 
       compile({

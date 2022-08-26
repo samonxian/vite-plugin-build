@@ -27,8 +27,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
     singleFileBuildSuccessCallback,
     viteConfig,
     pluginHooks = {},
-    esOutputDir = 'es',
-    commonJsOutputDir = 'lib',
+    formats = ['cjs', 'es'],
   } = options;
 
   const lastBuildOptions = typeof buildOptions === 'function' ? buildOptions(fileRelativePath) : buildOptions;
@@ -126,6 +125,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
           ],
         },
         lib: {
+          // lib 配置只是为了防止 vite 报错，配置 rollupOptions.output 为数组的时候，已经无效。
           formats: ['cjs'],
           entry: path.resolve(process.cwd(), fileRelativePath),
           name: 'noop', // 这里设置只有在 UMD 格式才有效，避免验证报错才设置的，在这里没用
@@ -154,10 +154,15 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
   }
 
   await Promise.all(
-    [
-      commonJsOutputDir && lastBuild({ outputDir: commonJsOutputDir, format: 'commonjs' }),
-      esOutputDir && lastBuild({ outputDir: esOutputDir, format: 'es' }),
-    ].filter(Boolean),
+    formats
+      .map((format) => {
+        if (typeof format === 'string') {
+          format = { format, outDir: format };
+        }
+
+        return lastBuild({ outputDir: format.outDir, format: format.format });
+      })
+      .filter(Boolean),
   );
 
   incrementCount += 1;
@@ -193,6 +198,7 @@ export function createRemoveSuffix(code: string, suffix: string) {
   return lastCode;
 }
 
+export type Format = 'cjs' | 'es' | { format: 'cjs' | 'es'; outDir: string };
 export interface BuildFilesOptions {
   /**
    * 输入文件夹，相对于项目根目录下，格式为 `src` 或者 `src/test`
@@ -200,17 +206,24 @@ export interface BuildFilesOptions {
    */
   inputFolder?: string;
   /**
+   * 转换的格式，只支持 es 和 cjs
+   * @defaults [{ format: 'cjs', outDir: commonJsOutputDir }, { format: 'es', outDir: esOutputDir }]
+   */
+  formats?: Format[];
+  /**
    * 支持转换的文件后缀名
    * @defaults ['ts', 'tsx', 'js', 'jsx', 'vue', 'svelte']
    */
   extensions?: string[];
   /**
    * es 文件输出路径，设置为 false 相当于关闭 es 模块的构建
+   * v0.6 版本以上，请使用 formats 来设置输出目录，formats 优先级更高
    * @defaults es
    */
   esOutputDir?: string | false;
   /**
    * commonjs 文件输出路径，设置为 false 相当于关闭 commonjs 模块的构建
+   * v0.6 版本以上，请使用 formats 来设置输出目录，formats 优先级更高
    * @defaults lib
    */
   commonJsOutputDir?: string | false;
