@@ -71,7 +71,6 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
     const { outputDir, format } = options;
     const commonOutput: OutputOptions = {
       indent: false,
-      exports: 'named',
       assetFileNames: '[name].[ext]',
       inlineDynamicImports: true,
       ...lastRollupOptionsOutput,
