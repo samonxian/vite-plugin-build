@@ -114,6 +114,7 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
       build: {
         assetsDir: './',
         cssCodeSplit: true,
+        emptyOutDir: false,
         rollupOptions: {
           external: lastRollupOptionsExternal,
           output: [
