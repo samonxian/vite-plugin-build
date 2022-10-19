@@ -21,7 +21,7 @@
     "cm": "git-cz",
     "lint-staged": "lint-staged --allow-empty",
     "commitlint": "commitlint --edit $1",
-    "build": "npm run build -prefix ./packages/vite-plugin-build",
+    "build": "npm run build -prefix ./packages/vite-plugin-build && npm run build -prefix ./packages/svelte-tsc",
     "bootstrap": "lerna bootstrap --ignore-scripts -- --legacy-peer-deps",
     "build:publish": "npm run build && lerna publish"
   },
