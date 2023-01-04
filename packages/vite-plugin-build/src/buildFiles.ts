@@ -50,7 +50,12 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
         return id.includes('.less') || id.includes('.css') || id.includes('.svg');
       }
 
+      function isJson() {
+        return id.includes('.json');
+      }
+
       if (
+        isJson() ||
         isAsset() ||
         isVueTempFile(id) ||
         // 由于 id 会输出两次（原因未知），windows 下的两次路径还不一致，所以要特殊处理
