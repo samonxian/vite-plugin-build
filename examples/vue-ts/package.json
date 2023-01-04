@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.6.1",
+  "version": "0.7.0",
   "name": "vue-ts-example",
   "author": "samonxian",
   "main": "lib/index.js",
@@ -20,7 +20,7 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.6.4",
     "vite": "^4.0.3",
-    "vite-plugin-build": "^0.6.1",
+    "vite-plugin-build": "^0.7.0",
     "vue": "^3.2.37",
     "vue-tsc": "^0.39.0"
   }
