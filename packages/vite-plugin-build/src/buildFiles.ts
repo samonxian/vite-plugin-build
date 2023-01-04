@@ -69,13 +69,6 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
   }
   function createBuildConfig(options: CreateBuildConfigOptions): InlineConfig {
     const { outputDir, format } = options;
-    const commonOutput: OutputOptions = {
-      indent: false,
-      assetFileNames: '[name].[ext]',
-      inlineDynamicImports: true,
-      ...lastRollupOptionsOutput,
-      dir: undefined,
-    };
     const lastPluginHooks = Object.keys(pluginHooks).reduce((acc, cur) => {
       if (typeof pluginHooks[cur] === 'function') {
         acc[cur] = pluginHooks[cur];
@@ -119,9 +112,13 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
           external: lastRollupOptionsExternal,
           output: [
             {
-              file: `${outputDir}/${transformFilePath}`,
-              ...commonOutput,
+              entryFileNames: path.basename(transformFilePath),
               format,
+              indent: false,
+              assetFileNames: '[name].[ext]',
+              inlineDynamicImports: true,
+              ...(lastRollupOptionsOutput as any),
+              dir: path.dirname(path.resolve(outputDir, transformFilePath)),
             },
           ],
         },
