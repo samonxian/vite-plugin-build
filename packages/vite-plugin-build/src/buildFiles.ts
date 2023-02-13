@@ -47,7 +47,13 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
       }
 
       function isAsset() {
-        return id.includes('.less') || id.includes('.css') || id.includes('.svg');
+        return (
+          id.includes('.sass') ||
+          id.includes('.scss') ||
+          id.includes('.less') ||
+          id.includes('.css') ||
+          id.includes('.svg')
+        );
       }
 
       function isJson() {
