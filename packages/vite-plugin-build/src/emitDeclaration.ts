@@ -70,6 +70,22 @@ export function emitDeclaration(options: {
         fs.copyFileSync(filePath, copyTargetFilePath);
       }
     }
+
+    // 拷贝自定义类型文件
+    const sourceDtsFiles = fg.sync([`${rootDir}/**/*.d.ts`]);
+    for (const file of sourceDtsFiles) {
+      const filePath = path.resolve(process.cwd(), file);
+      if (commonJsOutputDir) {
+        const copyTargetFilePath = path.resolve(process.cwd(), file.replace(rootDir, commonJsOutputDir));
+        fs.ensureFileSync(copyTargetFilePath);
+        fs.copyFileSync(filePath, copyTargetFilePath);
+      }
+      if (esOutputDir) {
+        const copyTargetFilePath = path.resolve(process.cwd(), file.replace(rootDir, esOutputDir));
+        fs.ensureFileSync(copyTargetFilePath);
+        fs.copyFileSync(filePath, copyTargetFilePath);
+      }
+    }
   }
 }
 
