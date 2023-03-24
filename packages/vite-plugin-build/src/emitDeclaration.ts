@@ -57,6 +57,15 @@ export function emitDeclaration(options: {
       renameSvelteTdsFileName({ esOutputDir, commonJsOutputDir });
     }
 
+    // 添加拷贝构建根目录 .d.ts 后缀名的文件
+    const rootDtsFiles = fg.sync([`${rootDir}/**/*.d.ts`]);
+    for (const file of rootDtsFiles) {
+      const filePath = path.resolve(process.cwd(), file);
+      const copyTargetFilePath = path.resolve(process.cwd(), file.replace(new RegExp(`^${rootDir}`), outputDir));
+      fs.ensureFileSync(copyTargetFilePath);
+      fs.copyFileSync(filePath, copyTargetFilePath);
+    }
+
     if (commonJsOutputDir && esOutputDir) {
       const dtsFiles = fg.sync([`${commonJsOutputDir}/**/*.d.ts`]);
 
