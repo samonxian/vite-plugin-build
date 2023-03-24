@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.7.1",
+  "version": "0.8.0",
   "name": "react-example",
   "author": "samonxian",
   "main": "lib/index.js",
@@ -20,6 +20,6 @@
     "react": "^18.2.0",
     "rimraf": "^3.0.2",
     "vite": "^4.0.3",
-    "vite-plugin-build": "^0.7.1"
+    "vite-plugin-build": "^0.8.0"
   }
 }
