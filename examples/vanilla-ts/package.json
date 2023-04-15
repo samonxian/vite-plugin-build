@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.8.0",
+  "version": "0.9.0",
   "name": "vanilla-ts-example",
   "author": "samonxian",
   "main": "lib/index.js",
@@ -22,6 +22,6 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.6.4",
     "vite": "^4.0.3",
-    "vite-plugin-build": "^0.8.0"
+    "vite-plugin-build": "^0.9.0"
   }
 }
