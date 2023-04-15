@@ -1,9 +1,9 @@
 {
   "version": "0.8.0",
-  "name": "vite-plugin-build",
+  "name": "run-in-task-pool",
   "author": "samonxian",
   "main": "lib/index.js",
-  "description": "Transfom the whole folder in library mode.",
+  "description": "异步任务池，可以限制当前运行的总任务数。",
   "files": [
     "lib"
   ],
@@ -15,18 +15,11 @@
     "build": "npm run eslint && npm run clean && vite build"
   },
   "dependencies": {
-    "cross-spawn": "7.0.3",
-    "fast-glob": "^3.2.11",
-    "fs-extra": "^10.1.0",
-    "picocolors": "^1.0.0",
-    "svelte-tsc": "^0.8.0",
-    "run-in-task-pool": "^0.8.0",
+    "vite-plugin-build": "^0.7.1",
     "typescript": "^4.6.4",
     "vue-tsc": "^0.39.0"
   },
   "devDependencies": {
-    "@types/cross-spawn": "^6.0.2",
-    "@types/fs-extra": "^9.0.13",
     "eslint": "8.20.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.77.0",

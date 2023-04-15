@@ -3,6 +3,8 @@ import type { BuildOptions, InlineConfig, Plugin, UserConfig } from 'vite';
 import { build } from 'vite';
 import type { ExternalOption, OutputOptions } from 'rollup';
 import fg from 'fast-glob';
+import runInTaskPool from 'run-in-task-pool';
+import colors from 'picocolors';
 
 let incrementCount = 0;
 export function isVueTempFile(filePath: string) {
@@ -177,6 +179,8 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
 
   incrementCount += 1;
   singleFileBuildSuccessCallback?.(incrementCount, fileRelativePath);
+
+  return fileRelativePath;
 }
 
 export function removeSuffix(code: string) {
@@ -319,8 +323,20 @@ export async function buildFiles(options: BuildFilesOptions = {}) {
 
   incrementCount = 0;
   startBuild?.(srcFilePaths.length);
-  const buildPromiseAll = srcFilePaths.map((fileRelativePath) => transformFile(fileRelativePath, restOptions));
-  await Promise.all(buildPromiseAll);
+  await runInTaskPool(
+    srcFilePaths,
+    (fileRelativePath: string) => {
+      return transformFile(fileRelativePath, restOptions);
+    },
+    {
+      // 同时转换的问题件限制为 20 个
+      limit: 20,
+    },
+  ).then((result) => {
+    if (result.hasPartialError) {
+      console.error(colors.red('部分文件构建出错'));
+    }
+  });
   endBuild?.(incrementCount);
   incrementCount = 0; // 重置
 }

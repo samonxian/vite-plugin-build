@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "rootDir": "src", // 这里需要设置
+    "emitDeclarationOnly": true, // 只 emit 声明文件
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "declarationDir": "lib"
+  },
+  "include": ["src"],
+  "exclude": ["src/**/__tests__/**", "src/**/*.spec.ts", "src/**/*.spec.tsx"]
+}
