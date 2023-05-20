@@ -36,7 +36,13 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
   const lastBuildOptions = typeof buildOptions === 'function' ? buildOptions(fileRelativePath) : buildOptions;
 
   const extname = path.extname(fileRelativePath);
-  const transformFilePath = fileRelativePath.replace(/[^/]*\//, '').replace(extname, '.js');
+  let transformFilePath: string;
+
+  if (['.vue', '.svelte'].includes(extname)) {
+    transformFilePath = `${fileRelativePath.replace(/[^/]*\//, '')}.js`;
+  } else {
+    transformFilePath = fileRelativePath.replace(/[^/]*\//, '').replace(extname, '.js');
+  }
 
   const lastRollupOptionsOutput =
     typeof rollupOptionsOutput === 'function' ? rollupOptionsOutput(transformFilePath) : rollupOptionsOutput;
@@ -96,21 +102,6 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
           name: 'vite:build-file-transform',
           enforce: 'pre',
           ...lastPluginHooks,
-          transform(code, id) {
-            // @ts-ignore
-            const tran = lastPluginHooks.transform?.(code, id);
-
-            if (tran) {
-              return tran;
-            }
-
-            const lastCode = removeSuffix(code);
-
-            return {
-              code: lastCode,
-              map: lastBuildOptions?.sourcemap ? this.getCombinedSourcemap() : null,
-            };
-          },
         },
         ...(viteConfig?.plugins ? viteConfig.plugins : []),
       ],
@@ -181,35 +172,6 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
   singleFileBuildSuccessCallback?.(incrementCount, fileRelativePath);
 
   return fileRelativePath;
-}
-
-export function removeSuffix(code: string) {
-  let lastCode = code;
-  lastCode = createRemoveSuffix(lastCode, 'vue');
-  lastCode = createRemoveSuffix(lastCode, 'svelte');
-
-  return lastCode;
-}
-
-export function createRemoveSuffix(code: string, suffix: string) {
-  let lastCode = code;
-  const match = code.match(new RegExp(`.*(import|export).*from.*\\.${suffix}`, 'g'));
-
-  if (match) {
-    lastCode = match.reduce((acc, cur) => {
-      const replaceMatch = cur.match(new RegExp(`(.*)((import|export).*from.*)\\.${suffix}`));
-      if (replaceMatch) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [_, preStr, replaceStr] = replaceMatch;
-        if (preStr.trim() === '') {
-          acc = acc.replace(cur, replaceStr || '');
-        }
-      }
-      return acc;
-    }, code);
-  }
-
-  return lastCode;
 }
 
 export type Format = 'cjs' | 'es' | { format: 'cjs' | 'es'; outDir: string };
