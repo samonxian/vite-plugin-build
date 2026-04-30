@@ -12,6 +12,7 @@
     "clean": "rimraf lib es dist tsconfig.tsbuildinfo",
     "test": "vitest",
     "coverage": "vitest run --coverage",
+    "prebuild": "pnpm --filter run-in-task-pool build && pnpm --filter svelte-tsc build",
     "build": "npm run eslint && npm run clean && vite build"
   },
   "dependencies": {
@@ -19,18 +20,19 @@
     "fast-glob": "^3.2.11",
     "fs-extra": "^10.1.0",
     "picocolors": "^1.0.0",
-    "run-in-task-pool": "^0.10.0",
-    "svelte-tsc": "^0.10.0",
-    "typescript": "^4.6.4",
-    "vue-tsc": "^0.39.0"
+    "run-in-task-pool": "workspace:*",
+    "svelte-tsc": "workspace:*",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.7"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.2",
     "@types/fs-extra": "^9.0.13",
-    "eslint": "8.20.0",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.77.0",
-    "vite": "^4.0.3",
-    "vitest": "^0.18.0"
+    "eslint": "^8.57.1",
+    "rimraf": "^6.1.3",
+    "rolldown": "^1.0.0-rc.17",
+    "rollup": "^4.0.0",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
   }
 }

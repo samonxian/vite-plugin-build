@@ -21,7 +21,9 @@ export function emitDeclaration(options: {
   const shouldLogInfo = LogLevels[resolvedConfig.logLevel || 'info'] >= LogLevels.info;
 
   if (outputDir && rootDir) {
-    shouldLogInfo && restoreConsole.log(colors.cyan('emitting the declaration files...'));
+    if (shouldLogInfo) {
+      restoreConsole.log(colors.cyan('emitting the declaration files...'));
+    }
 
     if (isSvelte) {
       const { compile } = require('svelte-tsc');
@@ -34,10 +36,7 @@ export function emitDeclaration(options: {
       });
     } else {
       const tscPath = path.resolve(require.resolve('typescript').split('node_modules')[0], 'node_modules/.bin/tsc');
-      const vueTscPath = path.resolve(
-        require.resolve('vue-tsc/out/proxy').split('node_modules')[0],
-        'node_modules/.bin/vue-tsc',
-      );
+      const vueTscPath = path.resolve(path.dirname(require.resolve('vue-tsc/package.json')), '../.bin/vue-tsc');
 
       spawn.sync(
         isVue ? vueTscPath : tscPath,

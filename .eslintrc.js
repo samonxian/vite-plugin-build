@@ -2,7 +2,7 @@ const { defineConfig } = require('eslint-define-config');
 
 module.exports = defineConfig({
   root: true,
-  extends: ['eslint:recommended', 'plugin:node/recommended', 'plugin:@typescript-eslint/recommended'],
+  extends: ['eslint:recommended', 'plugin:n/recommended', 'plugin:@typescript-eslint/recommended'],
   plugins: ['import'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -16,19 +16,28 @@ module.exports = defineConfig({
     'no-empty': ['warn', { allowEmptyCatch: true }],
     'no-process-exit': 'off',
     'no-useless-escape': 'off',
+    'n/no-process-exit': 'off',
     'prefer-const': [
       'warn',
       {
         destructuring: 'all',
       },
     ],
-    'node/no-deprecated-api': 'off',
-    'node/no-unpublished-import': 'off',
-    'node/no-unpublished-require': 'off',
-    'node/no-unsupported-features/es-syntax': 'off',
-    'node/no-missing-import': [
+    'n/no-deprecated-api': 'off',
+    'n/no-unpublished-import': 'off',
+    'n/no-unpublished-require': 'off',
+    'n/no-unsupported-features/es-syntax': 'off',
+    'n/no-missing-import': [
       'error',
       {
+        allowModules: ['run-in-task-pool', 'svelte-tsc', 'rolldown'],
+        tryExtensions: ['.js', '.json', '.ts'],
+      },
+    ],
+    'n/no-missing-require': [
+      'error',
+      {
+        allowModules: ['run-in-task-pool', 'svelte-tsc', 'rolldown'],
         tryExtensions: ['.js', '.json', '.ts'],
       },
     ],
@@ -43,6 +52,7 @@ module.exports = defineConfig({
     '@typescript-eslint/no-inferrable-types': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/no-require-imports': 'off',
     '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     '@typescript-eslint/no-unused-vars': ['error'],
 

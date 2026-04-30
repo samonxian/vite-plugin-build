@@ -62,13 +62,15 @@ export function buildPlugin(options: Options = {}): Plugin {
       fs.writeFileSync(tempTsFilePath, 'const a = 2', { encoding: 'utf-8' });
       config.build = {
         emptyOutDir: false,
-        rollupOptions: {
+        rolldownOptions: {
           output: { dir: path.resolve(process.cwd(), 'node_modules/.temp/dist') },
         },
         lib: {
           entry: tempTsFilePath,
           name: 'noop',
-          formats: [],
+          // Vite 8 (Rolldown) skips the build lifecycle entirely with an empty formats array.
+          // Use 'es' as a minimal format to ensure closeBundle is called.
+          formats: ['es'],
         },
       };
 
@@ -164,8 +166,8 @@ export function buildPlugin(options: Options = {}): Plugin {
           return null;
         },
 
-        writeBundle: (_, output) => {
-          reporter.writeBundle(output);
+        writeBundle: (options, output) => {
+          reporter.writeBundle(output, options?.dir);
         },
       };
       const buildPromise = [

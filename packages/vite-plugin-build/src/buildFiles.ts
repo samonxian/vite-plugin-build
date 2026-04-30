@@ -1,7 +1,7 @@
 import path from 'path';
 import type { BuildOptions, InlineConfig, Plugin, UserConfig } from 'vite';
 import { build } from 'vite';
-import type { ExternalOption, OutputOptions } from 'rollup';
+import type { ExternalOption, OutputOptions } from 'rolldown';
 import fg from 'fast-glob';
 import runInTaskPool from 'run-in-task-pool';
 import colors from 'picocolors';
@@ -95,8 +95,12 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
       return acc;
     }, {});
 
+    // Strip Vite 8 properties that redirect inner build output to wrong locations
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { environments: _env, worker: _worker, optimizeDeps: _optDeps, ...safeViteConfig } = viteConfig || {};
+
     return {
-      ...viteConfig,
+      ...safeViteConfig,
       plugins: [
         {
           name: 'vite:build-file-transform',
@@ -112,25 +116,21 @@ export async function transformFile(fileRelativePath: string, options: BuildFile
         assetsDir: './',
         cssCodeSplit: true,
         emptyOutDir: false,
-        rollupOptions: {
+        outDir: path.dirname(path.resolve(outputDir, transformFilePath)),
+        rolldownOptions: {
           external: lastRollupOptionsExternal,
-          output: [
-            {
-              entryFileNames: path.basename(transformFilePath),
-              format,
-              indent: false,
-              assetFileNames: '[name].[ext]',
-              inlineDynamicImports: true,
-              ...(lastRollupOptionsOutput as any),
-              dir: path.dirname(path.resolve(outputDir, transformFilePath)),
-            },
-          ],
+          output: {
+            entryFileNames: path.basename(transformFilePath),
+            assetFileNames: '[name].[ext]',
+            codeSplitting: false,
+            ...(lastRollupOptionsOutput as any),
+          },
         },
         lib: {
-          // lib 配置只是为了防止 vite 报错，配置 rollupOptions.output 为数组的时候，已经无效。
-          formats: ['cjs'],
+          formats: [format as any],
           entry: path.resolve(process.cwd(), fileRelativePath),
-          name: 'noop', // 这里设置只有在 UMD 格式才有效，避免验证报错才设置的，在这里没用
+          name: 'noop',
+          fileName: () => path.basename(transformFilePath).replace(/\.[^.]+$/, ''),
         },
         minify: false,
         ...lastBuildOptions,

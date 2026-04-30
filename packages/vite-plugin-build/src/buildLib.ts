@@ -38,9 +38,14 @@ export async function buildLib(options: BuildLibOptions) {
   const lastBuildOptions = [].concat(buildOptions).map((c: BuildOptions) => {
     return { ...c, emptyOutDir: false };
   });
+
+  // Strip Vite 8 properties that redirect inner build output to wrong locations
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { environments: _env, worker: _worker, optimizeDeps: _optDeps, ...safeViteConfig } = viteConfig || {};
+
   const buildPs = lastBuildOptions.map((buildOption) => {
     return build({
-      ...viteConfig,
+      ...safeViteConfig,
       plugins: [
         ...(viteConfig ? viteConfig.plugins : []),
         {

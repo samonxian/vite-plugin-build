@@ -7,18 +7,16 @@
     "lib"
   ],
   "scripts": {
-    "clean": "rimraf lib es dist tsconfig.tsbuildinfo",
-    "build": "npm run clean && vite build"
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "build": "npm run clean && tsc -p tsconfig.json"
   },
   "dependencies": {
     "fs-extra": "^10.1.0",
-    "svelte2tsx": "^0.5.13"
+    "svelte2tsx": "^0.7.53"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.6.4",
-    "vite": "^4.0.3",
-    "vite-plugin-build": "^0.10.0"
+    "rimraf": "^6.1.3",
+    "typescript": "^5.0.0"
   }
 }

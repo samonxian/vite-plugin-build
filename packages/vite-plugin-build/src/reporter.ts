@@ -5,7 +5,7 @@ import { promisify } from 'node:util';
 import colors from 'picocolors';
 import { normalizePath } from 'vite';
 import type { LogLevel, ResolvedConfig } from 'vite';
-import type { OutputBundle } from 'rollup';
+import type { OutputBundle } from 'rolldown';
 import { restoreConsole } from './InterceptConsole';
 
 export const LogLevels: Record<LogLevel, number> = {
@@ -72,9 +72,14 @@ export function createReporter(config: ResolvedConfig) {
   const shouldLogInfo = LogLevels[config.logLevel || 'info'] >= LogLevels.info;
   let hasTransformed = false;
   let transformedCount = 0;
-  const outputBudles: OutputBundle[] = [];
+  interface BundleEntry {
+    bundle: OutputBundle;
+    /** Absolute path to the output directory for this bundle */
+    dir?: string;
+  }
+  const outputBudles: BundleEntry[] = [];
 
-  async function writeBundle(output: OutputBundle) {
+  async function writeBundle(output: OutputBundle, dir?: string) {
     if (shouldLogInfo) {
       let longest = 0;
       for (const file in output) {
@@ -82,11 +87,17 @@ export function createReporter(config: ResolvedConfig) {
         if (l > longest) longest = l;
       }
 
+      // Convert absolute dir to a path relative to project root for display
+      const relativeDir = dir ? normalizePath(path.relative(config.root, dir)) : undefined;
+
       await Promise.all(
         Object.keys(output).map(async (file) => {
           const chunk = output[file];
+          // Prefer the dir passed via writeBundle options over the legacy outputFilePath
           // @ts-ignore
-          const { outputFilePath } = chunk;
+          const legacyOutputFilePath: string | undefined = chunk.outputFilePath;
+          const outputPath = relativeDir ? `${relativeDir}/${chunk.fileName}` : legacyOutputFilePath;
+
           if (chunk.type === 'chunk') {
             printFileInfo(
               chunk.fileName,
@@ -94,27 +105,22 @@ export function createReporter(config: ResolvedConfig) {
               WriteType.JS,
               longest,
               await getCompressedSize(chunk.code),
-              outputFilePath,
+              outputPath,
             );
             if (chunk.map) {
-              printFileInfo(
-                chunk.fileName + '.map',
-                chunk.map.toString(),
-                WriteType.SOURCE_MAP,
-                longest,
-                outputFilePath,
-              );
+              printFileInfo(chunk.fileName + '.map', chunk.map.toString(), WriteType.SOURCE_MAP, longest, outputPath);
             }
           } else if (chunk.source) {
             const isCSS = chunk.fileName.endsWith('.css');
             const isMap = chunk.fileName.endsWith('.js.map');
+            const assetOutputPath = outputPath ? outputPath.replace(`/${path.basename(outputPath)}`, '') : undefined;
             printFileInfo(
               chunk.fileName,
               chunk.source,
               isCSS ? WriteType.CSS : isMap ? WriteType.SOURCE_MAP : WriteType.ASSET,
               longest,
               isCSS ? await getCompressedSize(chunk.source) : undefined,
-              outputFilePath ? outputFilePath.replace(`/${path.basename(outputFilePath)}`, '') : null,
+              assetOutputPath,
             );
           }
         }),
@@ -141,8 +147,8 @@ export function createReporter(config: ResolvedConfig) {
       }
     },
 
-    async writeBundle(output: OutputBundle) {
-      outputBudles.push(output);
+    async writeBundle(output: OutputBundle, dir?: string) {
+      outputBudles.push({ bundle: output, dir });
     },
 
     async buildEndAll() {
@@ -155,7 +161,7 @@ export function createReporter(config: ResolvedConfig) {
         restoreConsole.info(`${colors.green(`✓`)} ${transformedCount} modules transformed.`);
 
         for (let i = 0; i < outputBudles.length; i++) {
-          await writeBundle(outputBudles[i]);
+          await writeBundle(outputBudles[i].bundle, outputBudles[i].dir);
         }
       }
     },
@@ -172,7 +178,7 @@ function writeLine(output: string) {
   }
 }
 
-function throttle(fn: Function) {
+function throttle(fn: (...args: unknown[]) => void) {
   let timerHandle: NodeJS.Timeout | null = null;
   return (...args: any[]) => {
     if (timerHandle) return;

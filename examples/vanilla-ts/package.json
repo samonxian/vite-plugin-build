@@ -19,9 +19,9 @@
   },
   "devDependencies": {
     "cpy-cli": "^4.1.0",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.6.4",
-    "vite": "^4.0.3",
-    "vite-plugin-build": "^0.10.0"
+    "rimraf": "^6.1.3",
+    "typescript": "^5.0.0",
+    "vite": "^8.0.10",
+    "vite-plugin-build": "workspace:*"
   }
 }
